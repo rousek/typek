@@ -173,6 +173,22 @@ export function typeAtPosition(
 
         const iterableType = resolveExprType(node.iterable);
         const elementType = iterableType.kind === TypeKind.Array ? iterableType.elementType : { kind: TypeKind.Any as const };
+
+        // Check if hovering over the loop variable name in {{#for variable in ...}}
+        if (
+          line === node.variableLine &&
+          column >= node.variableColumn &&
+          column < node.variableColumn + node.variable.length
+        ) {
+          return {
+            type: elementType,
+            name: node.variable,
+            line: node.variableLine,
+            column: node.variableColumn,
+            length: node.variable.length,
+          };
+        }
+
         loopVarStack.push({ variable: node.variable, type: elementType });
 
         for (const child of node.body) {

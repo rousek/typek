@@ -117,6 +117,8 @@ export interface IfBlockNode {
 export interface ForBlockNode {
   type: NodeType.ForBlock;
   variable: string;
+  variableLine: number;
+  variableColumn: number;
   iterable: ExprNode;
   body: ASTNode[];
   emptyBlock: ASTNode[] | null;
@@ -713,6 +715,8 @@ export function parse(template: string): TemplateAST {
     return {
       type: NodeType.ForBlock,
       variable: variableToken.value,
+      variableLine: variableToken.line,
+      variableColumn: variableToken.column,
       iterable,
       body,
       emptyBlock,

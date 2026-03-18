@@ -72,14 +72,15 @@
     ]
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --external:vscode --external:typescript --format=cjs --platform=node --sourcemap",
     "build:tsc": "tsc -b",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "package": "pnpm build && vsce package --no-dependencies",
+    "package": "pnpm build && vsce package",
     "install-ext": "pnpm build && vsce package --no-dependencies && code --install-extension typek-vscode-0.0.1.vsix --force"
   },
   "dependencies": {
-    "@typek/core": "workspace:*"
+    "@typek/core": "workspace:*",
+    "typescript": "^5.7.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.110.0",

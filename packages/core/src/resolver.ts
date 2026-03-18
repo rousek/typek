@@ -137,6 +137,11 @@ function convertType(tsType: ts.Type, checker: ts.TypeChecker, seen: Set<number>
     properties.set(prop.name, convertType(propType, checker, seen));
   }
 
+  // Remove from seen after processing — allow the same type to be
+  // referenced multiple times (e.g. Product in both products[] and featuredProduct).
+  // The guard only prevents actual circular references during traversal.
+  if (typeId !== undefined) seen.delete(typeId);
+
   if (properties.size > 0) {
     // Preserve the type name if it has a symbol (named interface/type alias)
     const symbol = tsType.getSymbol() ?? tsType.aliasSymbol;
