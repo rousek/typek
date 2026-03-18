@@ -1,6 +1,7 @@
 export { tokenize, TokenType, type Token } from "./lexer.js";
 export {
   parse,
+  ParseError,
   NodeType,
   type TemplateAST,
   type TypeDirective,

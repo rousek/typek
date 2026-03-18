@@ -1,5 +1,18 @@
 import { tokenize, TokenType, type Token } from "./lexer.js";
 
+export class ParseError extends Error {
+  line: number;
+  column: number;
+  length: number;
+  constructor(message: string, line: number, column: number, length: number) {
+    super(message);
+    this.name = "ParseError";
+    this.line = line;
+    this.column = column;
+    this.length = length;
+  }
+}
+
 export enum NodeType {
   Text,
   Expression,
@@ -204,6 +217,12 @@ function isOperatorToken(t: Token): boolean {
   return t.type in OPERATOR_TOKEN_TO_STRING;
 }
 
+/** Compute highlight length from the open-block token to the end of the block name. */
+function match0Length(openToken: Token, nameToken: Token): number {
+  // e.g. "{{#" is 3 chars, then the name like "empty" — highlight through the name
+  return (nameToken.column - openToken.column) + nameToken.value.length;
+}
+
 export function parse(template: string): TemplateAST {
   const tokens = tokenize(template);
   let pos = 0;
@@ -216,7 +235,9 @@ export function parse(template: string): TemplateAST {
   function expect(type: TokenType): Token {
     const t = tokens[pos];
     if (!t || t.type !== type) {
-      throw new Error(`Expected token type ${type}, got ${t?.type} (${t?.value}) at position ${pos}`);
+      const line = t?.line ?? 0;
+      const column = t?.column ?? 0;
+      throw new ParseError(`Unexpected token: ${t?.value ?? "end of template"}`, line, column, t?.value?.length ?? 1);
     }
     pos++;
     return t;
@@ -309,7 +330,10 @@ export function parse(template: string): TemplateAST {
 
   function parsePrimary(): ExprNode {
     const t = current();
-    if (!t) throw new Error("Unexpected end of tokens in expression");
+    if (!t) {
+      const prev = tokens[pos - 1];
+      throw new ParseError("Expected expression", prev?.line ?? 0, prev?.column ?? 0, prev?.value?.length ?? 1);
+    }
 
     if (t.type === TokenType.OpenParen) {
       pos++; // skip (
@@ -342,7 +366,7 @@ export function parse(template: string): TemplateAST {
       return node;
     }
 
-    throw new Error(`Unexpected token in expression: ${t.type} (${t.value})`);
+    throw new ParseError(`Expected expression, got: ${t.value}`, t.line, t.column, t.value.length);
   }
 
   // Collect expression tokens between current position and a close token
@@ -384,7 +408,8 @@ export function parse(template: string): TemplateAST {
         // Check for meta-variable
         if (peekType() === TokenType.MetaVariable) {
           if (!insideForBlock) {
-            throw new Error("Meta-variables (@index, @first, @last, @length) can only be used inside a for block");
+            const metaName = current()!.value;
+            throw new ParseError(`{{${metaName}}} can only be used inside a {{#for}} block`, t.line, t.column, 2 + metaName.length + 2);
           }
           const metaToken = advance();
           if (peekType() === TokenType.WhitespaceStrip) {
@@ -447,6 +472,14 @@ export function parse(template: string): TemplateAST {
       } else if (t.type === TokenType.OpenBlock) {
         pos++; // skip {{# or {{~#
         const stripLeading = t.value === "{{~#";
+        const nextTok = current();
+        if (nextTok && nextTok.type === TokenType.Identifier) {
+          // Unknown block name — throw a helpful error
+          throw new ParseError(
+            `Unknown block tag: {{#${nextTok.value}}}`,
+            t.line, t.column, 3 + nextTok.value.length,
+          );
+        }
         const blockNameToken = expect(TokenType.BlockName);
 
         switch (blockNameToken.value) {
@@ -482,8 +515,28 @@ export function parse(template: string): TemplateAST {
             }
             break;
           }
+          case "empty":
+            throw new ParseError(
+              "{{#empty}} can only be used inside a {{#for}} block",
+              t.line, t.column, match0Length(t, blockNameToken),
+            );
+          case "default":
+            throw new ParseError(
+              "{{#default}} can only be used inside a {{#switch}} block",
+              t.line, t.column, match0Length(t, blockNameToken),
+            );
+          case "case":
+            throw new ParseError(
+              "{{#case}} can only be used inside a {{#switch}} block",
+              t.line, t.column, match0Length(t, blockNameToken),
+            );
+          case "else":
+            throw new ParseError(
+              "{{#else}} can only be used inside an {{#if}} block",
+              t.line, t.column, match0Length(t, blockNameToken),
+            );
           default:
-            throw new Error(`Unexpected block: ${blockNameToken.value}`);
+            throw new ParseError(`Unexpected block: {{#${blockNameToken.value}}}`, t.line, t.column, match0Length(t, blockNameToken));
         }
       } else {
         // Skip unknown tokens
@@ -535,7 +588,7 @@ export function parse(template: string): TemplateAST {
       pos++; // skip {{/
       const closeBlockName = expect(TokenType.BlockName);
       if (closeBlockName.value !== "if") {
-        throw new Error(`Expected /if but got /${closeBlockName.value}`);
+        throw new ParseError(`Expected {{/if}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
       }
       if (peekType() === TokenType.WhitespaceStrip) {
         stripTrailing = true;
@@ -543,7 +596,7 @@ export function parse(template: string): TemplateAST {
       }
       expect(TokenType.CloseExpression);
     } else {
-      throw new Error("Unclosed if block");
+      throw new ParseError("Unclosed {{#if}} block — missing {{/if}}", blockLine, blockColumn, 5);
     }
 
     return {
@@ -586,7 +639,7 @@ export function parse(template: string): TemplateAST {
           pos++; // skip {{/
           const closeBlockName = expect(TokenType.BlockName);
           if (closeBlockName.value !== "empty") {
-            throw new Error(`Expected /empty but got /${closeBlockName.value}`);
+            throw new ParseError(`Expected {{/empty}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
           }
           expect(TokenType.CloseExpression);
         }
@@ -603,11 +656,11 @@ export function parse(template: string): TemplateAST {
       pos++; // skip {{/
       const closeBlockName = expect(TokenType.BlockName);
       if (closeBlockName.value !== "for") {
-        throw new Error(`Expected /for but got /${closeBlockName.value}`);
+        throw new ParseError(`Expected {{/for}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
       }
       expect(TokenType.CloseExpression);
     } else {
-      throw new Error("Unclosed for block");
+      throw new ParseError("Unclosed {{#for}} block — missing {{/for}}", blockLine, blockColumn, 5);
     }
 
     insideForBlock = prevInsideForBlock;
@@ -691,11 +744,11 @@ export function parse(template: string): TemplateAST {
       pos++; // skip {{/
       const closeBlockName = expect(TokenType.BlockName);
       if (closeBlockName.value !== "switch") {
-        throw new Error(`Expected /switch but got /${closeBlockName.value}`);
+        throw new ParseError(`Expected {{/switch}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
       }
       expect(TokenType.CloseExpression);
     } else {
-      throw new Error("Unclosed switch block");
+      throw new ParseError("Unclosed {{#switch}} block — missing {{/switch}}", blockLine, blockColumn, 10);
     }
 
     return {
@@ -724,6 +777,17 @@ export function parse(template: string): TemplateAST {
   }
 
   const body = parseBody(new Set());
+
+  // Check for stray closing tags at the top level
+  if (pos < tokens.length && peekType() === TokenType.CloseBlock) {
+    const closeToken = current()!;
+    const nameToken = tokens[pos + 1];
+    const name = nameToken?.type === TokenType.BlockName ? nameToken.value : "?";
+    throw new ParseError(
+      `Unexpected {{/${name}}} — no matching {{#${name}}} block found`,
+      closeToken.line, closeToken.column, 3 + name.length,
+    );
+  }
 
   return { typeDirective, body };
 }

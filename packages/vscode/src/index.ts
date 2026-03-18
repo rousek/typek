@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import {
   parse,
+  ParseError,
   typecheck,
   resolveType,
   typeAtPosition,
@@ -224,7 +225,9 @@ function checkDocument(document: vscode.TextDocument): void {
   } catch (err) {
     // Parse error
     const message = err instanceof Error ? err.message : String(err);
-    const range = new vscode.Range(0, 0, 0, 1);
+    const range = err instanceof ParseError
+      ? new vscode.Range(err.line, err.column, err.line, err.column + err.length)
+      : new vscode.Range(0, 0, 0, template.indexOf("\n") || template.length);
     const vsDiag = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Error);
     vsDiag.source = "typek";
     diagnostics.push(vsDiag);
