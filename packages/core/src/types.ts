@@ -38,6 +38,7 @@ export interface TArray {
 export interface TObject {
   kind: TypeKind.Object;
   properties: Map<string, Type>;
+  name?: string;
 }
 export interface TUnion {
   kind: TypeKind.Union;

@@ -4,7 +4,16 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm add:*)",
       "Bash(pnpm typecheck:*)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "Bash(rm -f typek-vscode-*.vsix)",
+      "Bash(npx vsce:*)",
+      "Bash(code --install-extension typek-vscode-0.0.2.vsix --force)",
+      "Bash(code --list-extensions --show-versions)",
+      "Bash(sed -i '' 's/\"\"\"\"0.0.2\"\"\"\"/\"\"\"\"0.0.3\"\"\"\"/' package.json)",
+      "Bash(code --install-extension typek-vscode-0.0.3.vsix --force)",
+      "Bash(pnpm -r run build)",
+      "Bash(sed -i '' 's/\"\"\"\"0.0.3\"\"\"\"/\"\"\"\"0.0.4\"\"\"\"/' package.json)",
+      "Bash(code --install-extension typek-vscode-0.0.4.vsix --force)"
     ]
   }
 }

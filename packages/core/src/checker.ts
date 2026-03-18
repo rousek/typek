@@ -48,6 +48,34 @@ function resolveProperty(type: Type, name: string): Type | undefined {
   return undefined;
 }
 
+function describeType(type: Type): string {
+  if (type.kind === TypeKind.Object && type.name) return type.name;
+  if (type.kind === TypeKind.Union) {
+    for (const t of type.types) {
+      if (t.kind === TypeKind.Object && t.name) return t.name;
+    }
+  }
+  return formatType(type);
+}
+
+function getPropertyNames(type: Type): string[] {
+  if (type.kind === TypeKind.Object) return [...type.properties.keys()];
+  if (type.kind === TypeKind.Union) {
+    for (const t of type.types) {
+      if (t.kind === TypeKind.Null || t.kind === TypeKind.Undefined) continue;
+      const names = getPropertyNames(t);
+      if (names.length > 0) return names;
+    }
+  }
+  return [];
+}
+
+function formatExpectedProps(type: Type): string {
+  const names = getPropertyNames(type);
+  if (names.length === 0) return "";
+  return `. Expected: ${names.join(", ")}`;
+}
+
 export function typecheck(ast: TemplateAST, dataType: Type): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   const loopVarStack: Array<{ variable: string; type: Type }> = [];
@@ -76,7 +104,7 @@ export function typecheck(ast: TemplateAST, dataType: Type): Diagnostic[] {
         // Resolve from data type
         const resolved = resolveProperty(dataType, node.name);
         if (!resolved) {
-          error(`Property '${node.name}' does not exist on type '${formatType(dataType)}'`, node);
+          error(`Property '${node.name}' does not exist on type ${describeType(dataType)}${formatExpectedProps(dataType)}`, node);
           return { kind: TypeKind.Any };
         }
         return resolved;
@@ -87,7 +115,7 @@ export function typecheck(ast: TemplateAST, dataType: Type): Diagnostic[] {
         if (objectType.kind === TypeKind.Any) return { kind: TypeKind.Any };
         const resolved = resolveProperty(objectType, node.property);
         if (!resolved) {
-          error(`Property '${node.property}' does not exist on type '${formatType(objectType)}'`, node);
+          error(`Property '${node.property}' does not exist on type ${describeType(objectType)}${formatExpectedProps(objectType)}`, node);
           return { kind: TypeKind.Any };
         }
         return resolved;
@@ -106,10 +134,10 @@ export function typecheck(ast: TemplateAST, dataType: Type): Diagnostic[] {
         // Arithmetic operators (except +) require numbers
         if (["-", "*", "/"].includes(node.operator)) {
           if (!isNumeric(leftType) && leftType.kind !== TypeKind.Any) {
-            warning(`Left operand of '${node.operator}' is '${formatType(leftType)}', expected 'number'`, node.left);
+            warning(`Left operand of '${node.operator}' is ${formatType(leftType)}, expected number`, node.left);
           }
           if (!isNumeric(rightType) && rightType.kind !== TypeKind.Any) {
-            warning(`Right operand of '${node.operator}' is '${formatType(rightType)}', expected 'number'`, node.right);
+            warning(`Right operand of '${node.operator}' is ${formatType(rightType)}, expected number`, node.right);
           }
           return { kind: TypeKind.Number };
         }
@@ -164,7 +192,7 @@ export function typecheck(ast: TemplateAST, dataType: Type): Diagnostic[] {
         if (iterableType.kind === TypeKind.Array) {
           elementType = iterableType.elementType;
         } else if (iterableType.kind !== TypeKind.Any) {
-          error(`'${formatExpr(node.iterable)}' is not iterable (type '${formatType(iterableType)}' is not an array)`, node.iterable);
+          error(`${formatExpr(node.iterable)} is not iterable (type ${describeType(iterableType)} is not an array)`, node.iterable);
         }
 
         loopVarStack.push({ variable: node.variable, type: elementType });

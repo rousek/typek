@@ -112,7 +112,10 @@ function convertType(tsType: ts.Type, checker: ts.TypeChecker, seen: Set<number>
   }
 
   if (properties.size > 0) {
-    return { kind: TypeKind.Object, properties };
+    // Preserve the type name if it has a symbol (named interface/type alias)
+    const symbol = tsType.getSymbol() ?? tsType.aliasSymbol;
+    const name = symbol?.name && symbol.name !== "__type" ? symbol.name : undefined;
+    return { kind: TypeKind.Object, properties, name };
   }
 
   return { kind: TypeKind.Any };
