@@ -1,0 +1,18 @@
+{
+  "name": "typek-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compile": "typek compile",
+    "render": "tsx src/render.ts",
+    "build": "pnpm compile && pnpm render",
+    "clean": "typek clean && rm -rf dist out"
+  },
+  "dependencies": {
+    "@typek/cli": "workspace:*",
+    "@typek/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}
