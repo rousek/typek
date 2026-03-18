@@ -1,4 +1,4 @@
-{{! @type PageData from "./types" }}
+{{#import PageData from "./types"}}
 <html>
 <head><title>{{title}}</title></head>
 <body>

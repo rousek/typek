@@ -270,21 +270,21 @@ export function parse(template: string): TemplateAST {
 
   // Parse type directive from the beginning of the tokens
   function parseTypeDirective(): TypeDirective {
-    // First tokens must be: OpenComment, TypeDirective, Identifier, From, StringLiteral, CloseComment
-    if (peekType() !== TokenType.OpenComment) {
-      throw new Error("Template must start with a type directive: {{! @type TypeName from \"path\" }}");
+    // Expected: {{#import TypeName from "path"}} or {{#import TypeName from 'path'}}
+    if (peekType() !== TokenType.OpenBlock) {
+      throw new Error("Template must start with an import: {{#import TypeName from \"path\"}}");
     }
-    pos++; // OpenComment
+    pos++; // OpenBlock
 
-    if (peekType() !== TokenType.TypeDirective) {
-      throw new Error("Template must start with a type directive: {{! @type TypeName from \"path\" }}");
+    if (peekType() !== TokenType.BlockName || current()!.value !== "import") {
+      throw new Error("Template must start with an import: {{#import TypeName from \"path\"}}");
     }
-    pos++; // @type
+    pos++; // import
 
     const typeNameToken = expect(TokenType.Identifier);
     expect(TokenType.From);
     const fromToken = expect(TokenType.StringLiteral);
-    expect(TokenType.CloseComment);
+    expect(TokenType.CloseExpression);
 
     return {
       typeName: typeNameToken.value,
@@ -294,12 +294,16 @@ export function parse(template: string): TemplateAST {
     };
   }
 
-  // Check for duplicate type directives
+  // Check for duplicate import directives
   function checkNoDuplicateDirective() {
-    // Scan remaining tokens for another @type directive
     for (let i = pos; i < tokens.length; i++) {
-      if (tokens[i].type === TokenType.TypeDirective) {
-        throw new Error("Only one type directive is allowed per template");
+      if (
+        tokens[i].type === TokenType.BlockName &&
+        tokens[i].value === "import" &&
+        i > 0 &&
+        tokens[i - 1].type === TokenType.OpenBlock
+      ) {
+        throw new Error("Only one {{#import}} is allowed per template");
       }
     }
   }
@@ -551,6 +555,11 @@ export function parse(template: string): TemplateAST {
             }
             break;
           }
+          case "import":
+            throw new ParseError(
+              "{{#import}} must be the first line of the template",
+              t.line, t.column, match0Length(t, blockNameToken),
+            );
           case "empty":
             throw new ParseError(
               "{{#empty}} can only be used inside a {{#for}} block",

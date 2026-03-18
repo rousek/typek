@@ -1,4 +1,4 @@
-{{! @type User from "./types" }}
+{{#import User from "./types"}}
 <div class="component">
   <h1>{{name}}</h1>
   {{#raw}}

@@ -46,7 +46,7 @@ export interface Token {
 }
 
 const BLOCK_NAMES = new Set([
-  "if", "else", "for", "empty", "switch", "case", "default", "raw", "with",
+  "if", "else", "for", "empty", "switch", "case", "default", "raw", "with", "import",
 ]);
 
 const META_VARIABLES = new Set(["@index", "@first", "@last", "@length"]);

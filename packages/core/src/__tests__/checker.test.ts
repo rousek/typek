@@ -44,63 +44,63 @@ function check(template: string, dataType: Type): Diagnostic[] {
 describe("type checker", () => {
   describe("valid templates", () => {
     it("accepts valid identifier", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{name}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{name}}', userType);
       expect(diags).toEqual([]);
     });
 
     it("accepts valid property access", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{address.street}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{address.street}}', userType);
       expect(diags).toEqual([]);
     });
 
     it("accepts valid for loop", () => {
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#for user in users}}{{user.name}}{{/for}}',
+        '{{#import T from "./t"}}\n{{#for user in users}}{{user.name}}{{/for}}',
         pageDataType,
       );
       expect(diags).toEqual([]);
     });
 
     it("accepts valid if block", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{#if isActive}}yes{{/if}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{#if isActive}}yes{{/if}}', userType);
       expect(diags).toEqual([]);
     });
 
     it("accepts valid switch block", () => {
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#switch role}}{{#case "admin"}}Admin{{/case}}{{/switch}}',
+        '{{#import T from "./t"}}\n{{#switch role}}{{#case "admin"}}Admin{{/case}}{{/switch}}',
         userType,
       );
       expect(diags).toEqual([]);
     });
 
     it("accepts string literal in expression", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{#if role == "admin"}}yes{{/if}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{#if role == "admin"}}yes{{/if}}', userType);
       expect(diags).toEqual([]);
     });
 
     it("accepts number literal in expression", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{age + 1}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{age + 1}}', userType);
       expect(diags).toEqual([]);
     });
 
     it("accepts nested property through for loop", () => {
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#for user in users}}{{user.address.city}}{{/for}}',
+        '{{#import T from "./t"}}\n{{#for user in users}}{{user.address.city}}{{/for}}',
         pageDataType,
       );
       expect(diags).toEqual([]);
     });
 
     it("accepts raw expression", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{{name}}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{{name}}}', userType);
       expect(diags).toEqual([]);
     });
   });
 
   describe("invalid templates", () => {
     it("reports missing property", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{nonexistent}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{nonexistent}}', userType);
       expect(diags).toHaveLength(1);
       expect(diags[0].severity).toBe("error");
       expect(diags[0].message).toContain("nonexistent");
@@ -108,14 +108,14 @@ describe("type checker", () => {
     });
 
     it("reports missing nested property", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{address.zipCode}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{address.zipCode}}', userType);
       expect(diags).toHaveLength(1);
       expect(diags[0].severity).toBe("error");
       expect(diags[0].message).toContain("zipCode");
     });
 
     it("reports property access on primitive", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{name.foo}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{name.foo}}', userType);
       expect(diags).toHaveLength(1);
       expect(diags[0].severity).toBe("error");
       expect(diags[0].message).toContain("foo");
@@ -123,7 +123,7 @@ describe("type checker", () => {
 
     it("reports non-iterable in for loop", () => {
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#for x in name}}{{x}}{{/for}}',
+        '{{#import T from "./t"}}\n{{#for x in name}}{{x}}{{/for}}',
         userType,
       );
       expect(diags).toHaveLength(1);
@@ -133,7 +133,7 @@ describe("type checker", () => {
 
     it("reports missing property in for loop body", () => {
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#for user in users}}{{user.missing}}{{/for}}',
+        '{{#import T from "./t"}}\n{{#for user in users}}{{user.missing}}{{/for}}',
         pageDataType,
       );
       expect(diags).toHaveLength(1);
@@ -142,7 +142,7 @@ describe("type checker", () => {
     });
 
     it("reports missing property in if condition", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{#if missing}}yes{{/if}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{#if missing}}yes{{/if}}', userType);
       expect(diags).toHaveLength(1);
       expect(diags[0].severity).toBe("error");
       expect(diags[0].message).toContain("missing");
@@ -150,7 +150,7 @@ describe("type checker", () => {
 
     it("reports missing property in both if branches", () => {
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#if isActive}}{{foo}}{{#else}}{{bar}}{{/if}}',
+        '{{#import T from "./t"}}\n{{#if isActive}}{{foo}}{{#else}}{{bar}}{{/if}}',
         userType,
       );
       expect(diags).toHaveLength(2);
@@ -161,7 +161,7 @@ describe("type checker", () => {
 
   describe("warnings", () => {
     it("warns on arithmetic with non-number", () => {
-      const diags = check('{{! @type T from "./t" }}\n{{name * 2}}', userType);
+      const diags = check('{{#import T from "./t"}}\n{{name * 2}}', userType);
       expect(diags).toHaveLength(1);
       expect(diags[0].severity).toBe("warning");
       expect(diags[0].message).toContain("string");
@@ -177,7 +177,7 @@ describe("type checker", () => {
       });
       // Using "name" as loop variable should work and refer to array element
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#for name in items}}{{name.label}}{{/for}}',
+        '{{#import T from "./t"}}\n{{#for name in items}}{{name.label}}{{/for}}',
         type,
       );
       expect(diags).toEqual([]);
@@ -185,7 +185,7 @@ describe("type checker", () => {
 
     it("loop variable not accessible outside loop", () => {
       const diags = check(
-        '{{! @type T from "./t" }}\n{{#for user in users}}{{user.name}}{{/for}}{{user.name}}',
+        '{{#import T from "./t"}}\n{{#for user in users}}{{user.name}}{{/for}}{{user.name}}',
         pageDataType,
       );
       // "user" outside loop should try to resolve from data type and fail

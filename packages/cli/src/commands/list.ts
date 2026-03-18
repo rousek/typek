@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { findTsconfigRoot, findSourceRoot } from "./compile.js";
 
-const TYPE_DIRECTIVE_RE = /\{\{!\s*@type\s+(\w+)\s+from\s+["']([^"']+)["']\s*\}\}/;
+const TYPE_DIRECTIVE_RE = /\{\{#import\s+(\w+)\s+from\s+["']([^"']+)["']\s*\}\}/;
 
 export function list(): void {
   const projectRoot = findTsconfigRoot();

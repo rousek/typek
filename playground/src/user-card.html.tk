@@ -1,4 +1,4 @@
-{{! @type User from "./types" }}
+{{#import User from "./types"}}
 <div class="user-card">
   <h2>{{name}}</h2>
   <p>{{email}}</p>

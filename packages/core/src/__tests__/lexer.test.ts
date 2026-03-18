@@ -115,15 +115,15 @@ describe("lexer", () => {
     });
   });
 
-  describe("type directive", () => {
-    it("tokenizes type directive comment", () => {
-      const tokens = tokenize('{{! @type UserProfile from "./types" }}');
-      expect(bareContains(tokens, { type: TokenType.OpenComment, value: "{{!" })).toBe(true);
-      expect(bareContains(tokens, { type: TokenType.TypeDirective, value: "@type" })).toBe(true);
+  describe("import directive", () => {
+    it("tokenizes import directive", () => {
+      const tokens = tokenize('{{#import UserProfile from "./types"}}');
+      expect(bareContains(tokens, { type: TokenType.OpenBlock, value: "{{#" })).toBe(true);
+      expect(bareContains(tokens, { type: TokenType.BlockName, value: "import" })).toBe(true);
       expect(bareContains(tokens, { type: TokenType.Identifier, value: "UserProfile" })).toBe(true);
       expect(bareContains(tokens, { type: TokenType.From, value: "from" })).toBe(true);
       expect(bareContains(tokens, { type: TokenType.StringLiteral, value: "./types" })).toBe(true);
-      expect(bareContains(tokens, { type: TokenType.CloseComment, value: "}}" })).toBe(true);
+      expect(bareContains(tokens, { type: TokenType.CloseExpression, value: "}}" })).toBe(true);
     });
   });
 
@@ -298,7 +298,7 @@ describe("lexer", () => {
     });
 
     it("tracks positions for multi-line template", () => {
-      const tokens = tokenize("{{! @type T from \"./t\" }}\n<h1>{{title}}</h1>\n<p>{{body}}</p>");
+      const tokens = tokenize("{{#import T from \"./t\"}}\n<h1>{{title}}</h1>\n<p>{{body}}</p>");
       const title = tokens.find((t) => t.type === TokenType.Identifier && t.value === "title");
       const body = tokens.find((t) => t.type === TokenType.Identifier && t.value === "body");
       expect(title?.line).toBe(1);

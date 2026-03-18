@@ -83,7 +83,7 @@ describe("cli", () => {
         compilerOptions: { rootDir: "./src" },
       }));
       fs.writeFileSync(path.join(srcDir, "test.html.tk"),
-        '{{! @type User from "./types" }}\n<h1>{{name}}</h1>');
+        '{{#import User from "./types"}}\n<h1>{{name}}</h1>');
 
       vi.spyOn(console, "log").mockImplementation(() => {});
       main(["compile"]);
@@ -112,7 +112,7 @@ describe("cli", () => {
         compilerOptions: { rootDir: "./src" },
       }));
       fs.writeFileSync(path.join(srcDir, "test.html.tk"),
-        '{{! @type User from "./types" }}\n<h1>{{name}}</h1>');
+        '{{#import User from "./types"}}\n<h1>{{name}}</h1>');
 
       vi.spyOn(console, "log").mockImplementation(() => {});
       main(["check"]);
@@ -155,7 +155,7 @@ describe("cli", () => {
         compilerOptions: { rootDir: "./src" },
       }));
       fs.writeFileSync(path.join(srcDir, "card.html.tk"),
-        '{{! @type CardProps from "./types" }}\n<div>{{title}}</div>');
+        '{{#import CardProps from "./types"}}\n<div>{{title}}</div>');
 
       const spy = vi.spyOn(console, "log").mockImplementation(() => {});
       main(["list"]);
