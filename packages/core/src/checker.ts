@@ -143,33 +143,41 @@ interface TemplateTypeResult {
   typeName?: string;
 }
 
+type TemplateResolution = {
+  kind: "resolved";
+  result: TemplateTypeResult;
+} | {
+  kind: "not_found";
+  path: string;
+};
+
 /** Resolve the expected data type of a referenced template (.tk file) */
-function resolveTemplateType(templateDir: string, refPath: string): TemplateTypeResult | undefined {
+function resolveTemplateType(templateDir: string, refPath: string): TemplateResolution {
   const fullPath = path.resolve(templateDir, refPath.endsWith(".tk") ? refPath : refPath + ".tk");
   let template: string;
   try {
     template = fs.readFileSync(fullPath, "utf-8");
   } catch {
-    return undefined;
+    return { kind: "not_found", path: refPath };
   }
 
   let ast;
   try {
     ast = parse(template);
   } catch {
-    return undefined;
+    return { kind: "resolved", result: { acceptsData: false } };
   }
 
   const dir = ast.typeDirective;
-  if (!dir) return { acceptsData: false };
+  if (!dir) return { kind: "resolved", result: { acceptsData: false } };
 
   const typeFileDir = path.dirname(fullPath);
   const typeFilePath = path.resolve(typeFileDir, dir.from.endsWith(".ts") ? dir.from : dir.from + ".ts");
   try {
     const type = resolveType(typeFilePath, dir.typeName);
-    return { acceptsData: true, type, typeName: dir.typeName };
+    return { kind: "resolved", result: { acceptsData: true, type, typeName: dir.typeName } };
   } catch {
-    return undefined;
+    return { kind: "resolved", result: { acceptsData: false } };
   }
 }
 
@@ -331,13 +339,65 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
         break;
       }
 
-      case NodeType.SwitchBlock:
-        resolveExprType(node.expression);
+      case NodeType.SwitchBlock: {
+        const switchType = resolveExprType(node.expression);
         for (const c of node.cases) {
+          // Validate case value against expression type
+          if (switchType.kind !== TypeKind.Any) {
+            if (switchType.kind === TypeKind.String || switchType.kind === TypeKind.StringLiteral) {
+              // String switch with string literal cases — check if it's a valid value
+              if (switchType.kind === TypeKind.StringLiteral && c.value !== switchType.value) {
+                diagnostics.push({
+                  message: `Case "${c.value}" can never match expression of type "${switchType.value}"`,
+                  severity: "warning",
+                  line: c.line,
+                  column: c.column,
+                  length: c.value.length + 2,
+                });
+              }
+            } else if (switchType.kind === TypeKind.Union) {
+              // If union contains plain string, any case value is valid
+              const hasPlainString = switchType.types.some(t => t.kind === TypeKind.String);
+              if (!hasPlainString) {
+                // Check if the case value matches any string literal member
+                const stringMembers = switchType.types.filter(
+                  (t): t is { kind: TypeKind.StringLiteral; value: string } => t.kind === TypeKind.StringLiteral
+                );
+                if (stringMembers.length > 0 && !stringMembers.some(m => m.value === c.value)) {
+                  const validValues = stringMembers.map(m => `"${m.value}"`).join(", ");
+                  diagnostics.push({
+                    message: `Case "${c.value}" is not a valid member of type ${formatType(switchType)}. Valid values: ${validValues}`,
+                    severity: "error",
+                    line: c.line,
+                    column: c.column,
+                    length: c.value.length + 2,
+                  });
+                } else if (stringMembers.length === 0) {
+                  // Union has no string members at all
+                  diagnostics.push({
+                    message: `Switch cases use string values, but expression is ${formatType(switchType)}`,
+                    severity: "warning",
+                    line: node.line,
+                    column: node.column,
+                    length: formatExpr(node.expression).length,
+                  });
+                }
+              }
+            } else {
+              diagnostics.push({
+                message: `Switch cases use string values, but expression is ${formatType(switchType)}`,
+                severity: "warning",
+                line: node.line,
+                column: node.column,
+                length: formatExpr(node.expression).length,
+              });
+            }
+          }
           c.body.forEach(checkNode);
         }
         if (node.defaultCase) node.defaultCase.forEach(checkNode);
         break;
+      }
 
       case NodeType.WithBlock: {
         const withType = resolveExprType(node.expression);
@@ -351,8 +411,17 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
       case NodeType.Partial: {
         const passedType = node.dataExpr ? resolveExprType(node.dataExpr) : undefined;
         if (context) {
-          const target = resolveTemplateType(context.templateDir, node.path);
-          if (target) {
+          const resolution = resolveTemplateType(context.templateDir, node.path);
+          if (resolution.kind === "not_found") {
+            diagnostics.push({
+              message: `Partial template not found: '${node.path}'`,
+              severity: "error",
+              line: node.line,
+              column: node.column,
+              length: node.path.length,
+            });
+          } else {
+            const target = resolution.result;
             if (passedType && !target.acceptsData) {
               diagnostics.push({
                 message: `Partial '${node.path}' does not accept data (no {{#import}} directive)`,
@@ -386,8 +455,17 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
       case NodeType.LayoutBlock: {
         const passedType = node.dataExpr ? resolveExprType(node.dataExpr) : undefined;
         if (context) {
-          const target = resolveTemplateType(context.templateDir, node.path);
-          if (target) {
+          const resolution = resolveTemplateType(context.templateDir, node.path);
+          if (resolution.kind === "not_found") {
+            diagnostics.push({
+              message: `Layout template not found: '${node.path}'`,
+              severity: "error",
+              line: node.line,
+              column: node.column,
+              length: node.path.length,
+            });
+          } else {
+            const target = resolution.result;
             if (passedType && !target.acceptsData) {
               diagnostics.push({
                 message: `Layout '${node.path}' does not accept data (no {{#import}} directive)`,

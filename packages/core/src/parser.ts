@@ -128,10 +128,17 @@ export interface ForBlockNode {
   column: number;
 }
 
+export interface SwitchCase {
+  value: string;
+  body: ASTNode[];
+  line: number;
+  column: number;
+}
+
 export interface SwitchBlockNode {
   type: NodeType.SwitchBlock;
   expression: ExprNode;
-  cases: Array<{ value: string; body: ASTNode[] }>;
+  cases: SwitchCase[];
   defaultCase: ASTNode[] | null;
   line: number;
   column: number;
@@ -772,7 +779,7 @@ export function parse(template: string): TemplateAST {
     const expression = collectExpressionTokens();
     expect(TokenType.CloseExpression);
 
-    const cases: Array<{ value: string; body: ASTNode[] }> = [];
+    const cases: SwitchCase[] = [];
     let defaultCase: ASTNode[] | null = null;
 
     while (pos < tokens.length) {
@@ -799,7 +806,7 @@ export function parse(template: string): TemplateAST {
               expect(TokenType.CloseExpression);
             }
 
-            cases.push({ value: valueToken.value, body: caseBody });
+            cases.push({ value: valueToken.value, body: caseBody, line: valueToken.line, column: valueToken.column });
             continue;
           }
 

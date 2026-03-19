@@ -19,6 +19,7 @@ export {
   type IfBlockNode,
   type ForBlockNode,
   type SwitchBlockNode,
+  type SwitchCase,
   type WithBlockNode,
   type CommentNode,
   type PartialNode,

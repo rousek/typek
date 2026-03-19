@@ -247,25 +247,18 @@ export function compile(options: CompileOptions): CompileResult {
     const scopeVar = `__with_${n}`;
 
     let code = `const ${scopeVar} = ${compileExpr(node.expression)};\n`;
-
-    if (node.emptyBlock) {
-      code += `if (${scopeVar}) {\n`;
-    } else {
-      code += `if (${scopeVar}) {\n`;
-    }
+    code += `if (${scopeVar}) {\n`;
 
     scopeVarStack.push(scopeVar);
     code += compileBody(node.body);
     scopeVarStack.pop();
-    code += `}`;
 
     if (node.emptyBlock) {
-      code += ` else {\n`;
+      code += `} else {\n`;
       code += compileBody(node.emptyBlock);
-      code += `}`;
     }
 
-    code += "\n";
+    code += `}\n`;
     return code;
   }
 
