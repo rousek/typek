@@ -168,6 +168,82 @@ describe("type checker", () => {
     });
   });
 
+  describe("if-block narrowing", () => {
+    const companyType = obj({ companyName: { kind: TypeKind.String }, revenue: { kind: TypeKind.Number } });
+    (companyType as any).name = "Company";
+    const personType = obj({ firstName: { kind: TypeKind.String }, lastName: { kind: TypeKind.String } });
+    (personType as any).name = "Person";
+
+    const customerData = obj({
+      customer: { kind: TypeKind.Union, types: [companyType, personType] },
+    });
+
+    it("narrows union by property access in consequent", () => {
+      // customer.firstName only exists on Person → customer is Person inside the if
+      const diags = check(
+        '{{#import T from "./t"}}\n{{#if customer.firstName}}{{customer.lastName}}{{/if}}',
+        customerData,
+      );
+      expect(diags).toEqual([]);
+    });
+
+    it("narrows union in else branch to remaining members", () => {
+      // In else: customer is Company
+      const diags = check(
+        '{{#import T from "./t"}}\n{{#if customer.firstName}}{{customer.lastName}}{{#else}}{{customer.companyName}}{{/if}}',
+        customerData,
+      );
+      expect(diags).toEqual([]);
+    });
+
+    it("reports error for wrong member in narrowed block", () => {
+      // customer is Person inside if → companyName doesn't exist
+      const diags = check(
+        '{{#import T from "./t"}}\n{{#if customer.firstName}}{{customer.companyName}}{{/if}}',
+        customerData,
+      );
+      expect(diags).toHaveLength(1);
+      expect(diags[0].message).toContain("companyName");
+    });
+
+    it("reports error for wrong member in else branch", () => {
+      // customer is Company in else → firstName doesn't exist
+      const diags = check(
+        '{{#import T from "./t"}}\n{{#if customer.firstName}}ok{{#else}}{{customer.firstName}}{{/if}}',
+        customerData,
+      );
+      expect(diags).toHaveLength(1);
+      expect(diags[0].message).toContain("firstName");
+    });
+
+    it("narrows with || (either property narrows)", () => {
+      // customer.firstName || customer.lastName → both on Person → customer is Person
+      const diags = check(
+        '{{#import T from "./t"}}\n{{#if customer.firstName || customer.lastName}}{{customer.lastName}}{{#else}}{{customer.revenue}}{{/if}}',
+        customerData,
+      );
+      expect(diags).toEqual([]);
+    });
+
+    it("narrows with ! (inverts narrowing)", () => {
+      // !customer.firstName → consequent is Company, else is Person
+      const diags = check(
+        '{{#import T from "./t"}}\n{{#if !customer.firstName}}{{customer.companyName}}{{#else}}{{customer.lastName}}{{/if}}',
+        customerData,
+      );
+      expect(diags).toEqual([]);
+    });
+
+    it("truthiness narrowing removes null/undefined", () => {
+      // address is { street, city } | null → inside if, it's the object type
+      const diags = check(
+        '{{#import T from "./t"}}\n{{#if address}}{{address.street}}{{/if}}',
+        userType,
+      );
+      expect(diags).toEqual([]);
+    });
+  });
+
   describe("loop variable scoping", () => {
     it("loop variable shadows data property", () => {
       // Even if "name" exists on data type, inside for loop it refers to loop var

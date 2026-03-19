@@ -192,6 +192,8 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
   const diagnostics: Diagnostic[] = [];
   const loopVarStack: Array<{ variable: string; type: Type }> = [];
   const scopeStack: Type[] = [dataType];
+  // Narrowing: stack of maps from variable name to narrowed type
+  const narrowingStack: Array<Map<string, Type>> = [];
 
   function currentScope(): Type {
     return scopeStack[scopeStack.length - 1];
@@ -215,6 +217,140 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
     return formatExpr(node).length;
   }
 
+  /** Look up a variable's type without emitting errors (for narrowing analysis) */
+  function lookupVariableType(name: string): Type | undefined {
+    for (let i = loopVarStack.length - 1; i >= 0; i--) {
+      if (loopVarStack[i].variable === name) return loopVarStack[i].type;
+    }
+    return resolveProperty(currentScope(), name);
+  }
+
+  /** Get a narrowed type for a variable, checking the narrowing stack */
+  function getNarrowedType(name: string): Type | undefined {
+    for (let i = narrowingStack.length - 1; i >= 0; i--) {
+      const narrowed = narrowingStack[i].get(name);
+      if (narrowed) return narrowed;
+    }
+    return undefined;
+  }
+
+  function makeUnionType(types: Type[]): Type {
+    if (types.length === 0) return { kind: TypeKind.Any };
+    if (types.length === 1) return types[0];
+    return { kind: TypeKind.Union, types };
+  }
+
+  // --- Narrowing extraction ---
+
+  interface NarrowingInfo {
+    passing: Type[];
+    failing: Type[];
+  }
+
+  /** Extract narrowing facts from an if condition.
+   *  Returns a map from variable name to which union members pass/fail the check. */
+  function extractNarrowings(expr: ExprNode): Map<string, NarrowingInfo> {
+    // Property access: customer.firstName → narrow customer based on which union members have firstName
+    if (expr.type === NodeType.PropertyAccess && expr.object.type === NodeType.Identifier && expr.object.depth === 0) {
+      const varName = expr.object.name;
+      const varType = getNarrowedType(varName) ?? lookupVariableType(varName);
+      if (varType && varType.kind === TypeKind.Union) {
+        const passing: Type[] = [];
+        const failing: Type[] = [];
+        for (const member of varType.types) {
+          if (resolveProperty(member, expr.property)) {
+            passing.push(member);
+          } else {
+            failing.push(member);
+          }
+        }
+        if (passing.length > 0 && failing.length > 0) {
+          return new Map([[varName, { passing, failing }]]);
+        }
+      }
+    }
+
+    // Simple identifier: address → narrow away null/undefined (truthiness)
+    if (expr.type === NodeType.Identifier && expr.depth === 0) {
+      const varName = expr.name;
+      const varType = getNarrowedType(varName) ?? lookupVariableType(varName);
+      if (varType && varType.kind === TypeKind.Union) {
+        const passing = varType.types.filter(t => t.kind !== TypeKind.Null && t.kind !== TypeKind.Undefined);
+        const failing = varType.types.filter(t => t.kind === TypeKind.Null || t.kind === TypeKind.Undefined);
+        if (passing.length > 0 && failing.length > 0) {
+          return new Map([[varName, { passing, failing }]]);
+        }
+      }
+    }
+
+    // || : passing = union of both sides, failing = intersection
+    if (expr.type === NodeType.BinaryExpression && expr.operator === "||") {
+      const left = extractNarrowings(expr.left);
+      const right = extractNarrowings(expr.right);
+      return combineNarrowings(left, right, "or");
+    }
+
+    // && : passing = intersection, failing = union
+    if (expr.type === NodeType.BinaryExpression && expr.operator === "&&") {
+      const left = extractNarrowings(expr.left);
+      const right = extractNarrowings(expr.right);
+      return combineNarrowings(left, right, "and");
+    }
+
+    // ! : swap passing and failing
+    if (expr.type === NodeType.UnaryExpression) {
+      const inner = extractNarrowings(expr.operand);
+      const result = new Map<string, NarrowingInfo>();
+      for (const [name, info] of inner) {
+        result.set(name, { passing: info.failing, failing: info.passing });
+      }
+      return result;
+    }
+
+    return new Map();
+  }
+
+  function combineNarrowings(
+    left: Map<string, NarrowingInfo>,
+    right: Map<string, NarrowingInfo>,
+    mode: "or" | "and",
+  ): Map<string, NarrowingInfo> {
+    const result = new Map<string, NarrowingInfo>();
+    const allVars = new Set([...left.keys(), ...right.keys()]);
+    for (const name of allVars) {
+      const l = left.get(name);
+      const r = right.get(name);
+      if (l && r) {
+        if (mode === "or") {
+          // passing: union (either check passes), failing: intersection (both must fail)
+          const passing = [...new Set([...l.passing, ...r.passing])];
+          const failing = l.failing.filter(t => r.failing.includes(t));
+          result.set(name, { passing, failing });
+        } else {
+          // passing: intersection (both must pass), failing: union (either fails)
+          const passing = l.passing.filter(t => r.passing.includes(t));
+          const failing = [...new Set([...l.failing, ...r.failing])];
+          result.set(name, { passing, failing });
+        }
+      } else {
+        // Only one side narrows this variable — keep it as-is
+        result.set(name, (l ?? r)!);
+      }
+    }
+    return result;
+  }
+
+  function buildNarrowingMap(narrowings: Map<string, NarrowingInfo>, branch: "consequent" | "alternate"): Map<string, Type> {
+    const map = new Map<string, Type>();
+    for (const [name, info] of narrowings) {
+      const types = branch === "consequent" ? info.passing : info.failing;
+      if (types.length > 0) {
+        map.set(name, makeUnionType(types));
+      }
+    }
+    return map;
+  }
+
   function resolveExprType(node: ExprNode): Type {
     switch (node.type) {
       case NodeType.Identifier: {
@@ -233,7 +369,10 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
           }
           return resolved;
         }
-        // Check loop variables first (innermost scope wins)
+        // Check narrowing first
+        const narrowed = getNarrowedType(node.name);
+        if (narrowed) return narrowed;
+        // Check loop variables (innermost scope wins)
         for (let i = loopVarStack.length - 1; i >= 0; i--) {
           if (loopVarStack[i].variable === node.name) {
             return loopVarStack[i].type;
@@ -312,17 +451,29 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
         resolveExprType(node.expression);
         break;
 
-      case NodeType.IfBlock:
+      case NodeType.IfBlock: {
         resolveExprType(node.condition);
+        const narrowings = extractNarrowings(node.condition);
+
+        // Consequent: apply passing narrowings
+        const consequentMap = buildNarrowingMap(narrowings, "consequent");
+        if (consequentMap.size > 0) narrowingStack.push(consequentMap);
         node.consequent.forEach(checkNode);
+        if (consequentMap.size > 0) narrowingStack.pop();
+
+        // Alternate: apply failing narrowings
         if (node.alternate) {
+          const alternateMap = buildNarrowingMap(narrowings, "alternate");
+          if (alternateMap.size > 0) narrowingStack.push(alternateMap);
           if (Array.isArray(node.alternate)) {
             node.alternate.forEach(checkNode);
           } else {
             checkNode(node.alternate);
           }
+          if (alternateMap.size > 0) narrowingStack.pop();
         }
         break;
+      }
 
       case NodeType.ForBlock: {
         const iterableType = resolveExprType(node.iterable);

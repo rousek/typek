@@ -67,6 +67,7 @@ export function typeAtPosition(
   const loopVarStack: Array<{ variable: string; type: Type; iterablePath: string[] }> = [];
   const scopeStack: Type[] = [dataType];
   const scopePathStack: string[][] = [[]];
+  const narrowingStack: Array<Map<string, Type>> = [];
 
   function currentScope(): Type {
     return scopeStack[scopeStack.length - 1];
@@ -76,6 +77,113 @@ export function typeAtPosition(
     const idx = scopeStack.length - 1 - depth;
     if (idx < 0) return dataType;
     return scopeStack[idx];
+  }
+
+  function getNarrowedType(name: string): Type | undefined {
+    for (let i = narrowingStack.length - 1; i >= 0; i--) {
+      const narrowed = narrowingStack[i].get(name);
+      if (narrowed) return narrowed;
+    }
+    return undefined;
+  }
+
+  function lookupVariableType(name: string): Type | undefined {
+    for (let i = loopVarStack.length - 1; i >= 0; i--) {
+      if (loopVarStack[i].variable === name) return loopVarStack[i].type;
+    }
+    return resolveProperty(currentScope(), name);
+  }
+
+  // --- Narrowing extraction (mirrors checker.ts logic) ---
+
+  interface NarrowingInfo {
+    passing: Type[];
+    failing: Type[];
+  }
+
+  function extractNarrowings(expr: ExprNode): Map<string, NarrowingInfo> {
+    if (expr.type === NodeType.PropertyAccess && expr.object.type === NodeType.Identifier && expr.object.depth === 0) {
+      const varName = expr.object.name;
+      const varType = getNarrowedType(varName) ?? lookupVariableType(varName);
+      if (varType && varType.kind === TypeKind.Union) {
+        const passing: Type[] = [];
+        const failing: Type[] = [];
+        for (const member of varType.types) {
+          if (resolveProperty(member, expr.property)) {
+            passing.push(member);
+          } else {
+            failing.push(member);
+          }
+        }
+        if (passing.length > 0 && failing.length > 0) {
+          return new Map([[varName, { passing, failing }]]);
+        }
+      }
+    }
+
+    if (expr.type === NodeType.Identifier && expr.depth === 0) {
+      const varName = expr.name;
+      const varType = getNarrowedType(varName) ?? lookupVariableType(varName);
+      if (varType && varType.kind === TypeKind.Union) {
+        const passing = varType.types.filter(t => t.kind !== TypeKind.Null && t.kind !== TypeKind.Undefined);
+        const failing = varType.types.filter(t => t.kind === TypeKind.Null || t.kind === TypeKind.Undefined);
+        if (passing.length > 0 && failing.length > 0) {
+          return new Map([[varName, { passing, failing }]]);
+        }
+      }
+    }
+
+    if (expr.type === NodeType.BinaryExpression && expr.operator === "||") {
+      return combineNarrowings(extractNarrowings(expr.left), extractNarrowings(expr.right), "or");
+    }
+    if (expr.type === NodeType.BinaryExpression && expr.operator === "&&") {
+      return combineNarrowings(extractNarrowings(expr.left), extractNarrowings(expr.right), "and");
+    }
+    if (expr.type === NodeType.UnaryExpression) {
+      const inner = extractNarrowings(expr.operand);
+      const result = new Map<string, NarrowingInfo>();
+      for (const [name, info] of inner) {
+        result.set(name, { passing: info.failing, failing: info.passing });
+      }
+      return result;
+    }
+
+    return new Map();
+  }
+
+  function combineNarrowings(left: Map<string, NarrowingInfo>, right: Map<string, NarrowingInfo>, mode: "or" | "and"): Map<string, NarrowingInfo> {
+    const result = new Map<string, NarrowingInfo>();
+    const allVars = new Set([...left.keys(), ...right.keys()]);
+    for (const name of allVars) {
+      const l = left.get(name);
+      const r = right.get(name);
+      if (l && r) {
+        if (mode === "or") {
+          result.set(name, {
+            passing: [...new Set([...l.passing, ...r.passing])],
+            failing: l.failing.filter(t => r.failing.includes(t)),
+          });
+        } else {
+          result.set(name, {
+            passing: l.passing.filter(t => r.passing.includes(t)),
+            failing: [...new Set([...l.failing, ...r.failing])],
+          });
+        }
+      } else {
+        result.set(name, (l ?? r)!);
+      }
+    }
+    return result;
+  }
+
+  function buildNarrowingMap(narrowings: Map<string, NarrowingInfo>, branch: "consequent" | "alternate"): Map<string, Type> {
+    const map = new Map<string, Type>();
+    for (const [name, info] of narrowings) {
+      const types = branch === "consequent" ? info.passing : info.failing;
+      if (types.length === 1) map.set(name, types[0]);
+      else if (types.length > 1) map.set(name, { kind: TypeKind.Union, types });
+    }
+    return map;
   }
 
   function resolveExprPath(node: ExprNode): string[] {
@@ -108,6 +216,8 @@ export function typeAtPosition(
           const scope = scopeAtDepth(node.depth);
           return resolveProperty(scope, node.name) ?? { kind: TypeKind.Any };
         }
+        const narrowed = getNarrowedType(node.name);
+        if (narrowed) return narrowed;
         for (let i = loopVarStack.length - 1; i >= 0; i--) {
           if (loopVarStack[i].variable === node.name) return loopVarStack[i].type;
         }
@@ -177,20 +287,32 @@ export function typeAtPosition(
       case NodeType.IfBlock: {
         const condResult = findInExpr(node.condition);
         if (condResult) return condResult;
+
+        const narrowings = extractNarrowings(node.condition);
+
+        // Consequent: apply passing narrowings
+        const consequentMap = buildNarrowingMap(narrowings, "consequent");
+        if (consequentMap.size > 0) narrowingStack.push(consequentMap);
         for (const child of node.consequent) {
           const r = findInNode(child);
-          if (r) return r;
+          if (r) { if (consequentMap.size > 0) narrowingStack.pop(); return r; }
         }
+        if (consequentMap.size > 0) narrowingStack.pop();
+
+        // Alternate: apply failing narrowings
         if (node.alternate) {
+          const alternateMap = buildNarrowingMap(narrowings, "alternate");
+          if (alternateMap.size > 0) narrowingStack.push(alternateMap);
           if (Array.isArray(node.alternate)) {
             for (const child of node.alternate) {
               const r = findInNode(child);
-              if (r) return r;
+              if (r) { if (alternateMap.size > 0) narrowingStack.pop(); return r; }
             }
           } else {
             const r = findInNode(node.alternate);
-            if (r) return r;
+            if (r) { if (alternateMap.size > 0) narrowingStack.pop(); return r; }
           }
+          if (alternateMap.size > 0) narrowingStack.pop();
         }
         return undefined;
       }

@@ -1,0 +1,33 @@
+{{#import ContactsPage from "../models/types"}}
+{{#layout "../layouts/layout.html.tk" layout}}
+<style>
+  .contacts { display: grid; gap: 16px; }
+  .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+  .card h3 { margin: 0 0 8px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; }
+  .badge-company { background: #e8f0fe; color: #1a73e8; }
+  .badge-person { background: #fef3e8; color: #e87a1a; }
+</style>
+
+<h2>Contacts</h2>
+<div class="contacts">
+  {{#for customer in customers}}
+  <div class="card">
+    {{#if customer.companyName}}
+      <span class="badge badge-company">Company</span>
+      <h3>{{customer.companyName}}</h3>
+      <p>Reg. No: {{customer.registrationNumber}}</p>
+      <p>Revenue: ${{customer.revenue}}</p>
+      <p>Contact: {{customer.contactEmail}}</p>
+    {{#else}}
+      <span class="badge badge-person">Person</span>
+      <h3>{{customer.firstName}} {{customer.lastName}}</h3>
+      <p>Age: {{customer.age}}</p>
+      <p>Phone: {{customer.phone}}</p>
+    {{/if}}
+  </div>
+  {{/for}}
+</div>
+
+{{> "../partials/comment-form.html.tk"}}
+{{/layout}}
