@@ -112,8 +112,10 @@ export function formatType(type: Type): string {
       return "undefined";
     case TypeKind.Any:
       return "any";
-    case TypeKind.Array:
-      return `${formatType(type.elementType)}[]`;
+    case TypeKind.Array: {
+      const inner = formatType(type.elementType);
+      return type.elementType.kind === TypeKind.Union ? `(${inner})[]` : `${inner}[]`;
+    }
     case TypeKind.Object: {
       if (type.name) return type.name;
       const entries = [...type.properties.entries()];
