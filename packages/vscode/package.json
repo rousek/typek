@@ -2,7 +2,7 @@
   "name": "typek-vscode",
   "displayName": "Typek",
   "description": "Syntax highlighting and type checking for Typek typed templates (.tk files)",
-  "version": "0.0.6",
+  "version": "0.0.1",
   "publisher": "typek",
   "engines": {
     "vscode": "^1.110.0"
