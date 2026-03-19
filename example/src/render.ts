@@ -2,12 +2,15 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import renderCart from "@typek/render/cart.html";
-import renderEmail from "@typek/render/email.html";
-import renderProfile from "@typek/render/profile.html";
-import renderStore from "@typek/render/store.html";
+import renderCart from "@typek/render/templates/cart.html";
+import renderEmail from "@typek/render/templates/email.html";
+import renderProfile from "@typek/render/templates/profile.html";
+import renderStore from "@typek/render/templates/store.html";
 
-import { cartData, emailData, profileData, storeData } from "./data.js";
+import { storeData } from "./data/store.js";
+import { cartData } from "./data/cart.js";
+import { profileData } from "./data/profile.js";
+import { emailData } from "./data/email.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, "../dist");

@@ -1,4 +1,4 @@
-{{#import Product from "./types"}}
+{{#import Product from "../models/types"}}
 <div class="product">
   <img src="{{imageUrl}}" alt="{{name}}">
   <h3>{{name}}</h3>

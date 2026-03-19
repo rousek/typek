@@ -20,21 +20,21 @@ export function resolveType(filePath: string, typeName: string): Type {
 
   const checker = program.getTypeChecker();
 
-  // Find the declaration by iterating source file statements
-  for (const statement of sourceFile.statements) {
-    if (
-      ts.isInterfaceDeclaration(statement) &&
-      statement.name.text === typeName
-    ) {
-      const type = checker.getTypeAtLocation(statement.name);
-      return convertType(type, checker, new Set());
-    }
-    if (
-      ts.isTypeAliasDeclaration(statement) &&
-      statement.name.text === typeName
-    ) {
-      const type = checker.getTypeAtLocation(statement.name);
-      return convertType(type, checker, new Set());
+  // Find the type by looking up exports from the module symbol
+  const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+  if (moduleSymbol) {
+    const exports = checker.getExportsOfModule(moduleSymbol);
+    for (const exp of exports) {
+      if (exp.name === typeName) {
+        const resolvedSymbol = exp.flags & ts.SymbolFlags.Alias
+          ? checker.getAliasedSymbol(exp)
+          : exp;
+        const decl = resolvedSymbol.declarations?.[0];
+        if (decl) {
+          const type = checker.getTypeAtLocation(decl);
+          return convertType(type, checker, new Set());
+        }
+      }
     }
   }
 
@@ -56,15 +56,18 @@ export function listExportedTypes(filePath: string): string[] {
   const sourceFile = program.getSourceFile(filePath);
   if (!sourceFile) return [];
 
-  const names: string[] = [];
-  for (const statement of sourceFile.statements) {
-    if (ts.isInterfaceDeclaration(statement)) {
-      names.push(statement.name.text);
-    } else if (ts.isTypeAliasDeclaration(statement)) {
-      names.push(statement.name.text);
-    }
-  }
-  return names;
+  const checker = program.getTypeChecker();
+  const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+  if (!moduleSymbol) return [];
+
+  return checker.getExportsOfModule(moduleSymbol)
+    .filter(exp => {
+      const resolved = exp.flags & ts.SymbolFlags.Alias
+        ? checker.getAliasedSymbol(exp)
+        : exp;
+      return resolved.flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.TypeAlias);
+    })
+    .map(exp => exp.name);
 }
 
 export interface DeclarationLocation {
@@ -96,49 +99,58 @@ export function findDeclaration(
 
   const checker = program.getTypeChecker();
 
-  for (const statement of sourceFile.statements) {
-    if (
-      (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) &&
-      statement.name.text === typeName
-    ) {
-      // No property path — go to the type declaration itself
-      if (propertyPath.length === 0) {
-        const pos = sourceFile.getLineAndCharacterOfPosition(statement.name.getStart());
-        return { filePath, line: pos.line, column: pos.character };
-      }
+  // Find the type symbol via module exports (handles re-exports)
+  const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+  if (!moduleSymbol) return undefined;
 
-      let tsType = checker.getTypeAtLocation(statement.name);
-      let declaration: ts.Declaration | undefined;
+  const exports = checker.getExportsOfModule(moduleSymbol);
+  const exportSymbol = exports.find(e => e.name === typeName);
+  if (!exportSymbol) return undefined;
 
-      for (const propName of propertyPath) {
-        // Unwrap unions to find the object type
-        if (tsType.isUnion()) {
-          for (const t of tsType.types) {
-            if (!(t.flags & (ts.TypeFlags.Null | ts.TypeFlags.Undefined))) {
-              tsType = t;
-              break;
-            }
-          }
+  const resolvedSymbol = exportSymbol.flags & ts.SymbolFlags.Alias
+    ? checker.getAliasedSymbol(exportSymbol)
+    : exportSymbol;
+
+  const typeDecl = resolvedSymbol.declarations?.[0];
+  if (!typeDecl) return undefined;
+
+  // No property path — go to the type declaration itself
+  if (propertyPath.length === 0) {
+    const declSourceFile = typeDecl.getSourceFile();
+    const pos = declSourceFile.getLineAndCharacterOfPosition(typeDecl.getStart());
+    return { filePath: declSourceFile.fileName, line: pos.line, column: pos.character };
+  }
+
+  let tsType = checker.getTypeAtLocation(typeDecl);
+  let declaration: ts.Declaration | undefined;
+
+  for (const propName of propertyPath) {
+    // Unwrap unions to find the object type
+    if (tsType.isUnion()) {
+      for (const t of tsType.types) {
+        if (!(t.flags & (ts.TypeFlags.Null | ts.TypeFlags.Undefined))) {
+          tsType = t;
+          break;
         }
-        // Unwrap arrays to get element type
-        if (checker.isArrayType(tsType)) {
-          const typeArgs = checker.getTypeArguments(tsType as ts.TypeReference);
-          if (typeArgs[0]) tsType = typeArgs[0];
-        }
-
-        const prop = tsType.getProperty(propName);
-        if (!prop) return undefined;
-        declaration = prop.valueDeclaration ?? prop.declarations?.[0];
-        if (!declaration) return undefined;
-        tsType = checker.getTypeOfSymbolAtLocation(prop, declaration);
-      }
-
-      if (declaration) {
-        const declSourceFile = declaration.getSourceFile();
-        const pos = declSourceFile.getLineAndCharacterOfPosition(declaration.getStart());
-        return { filePath: declSourceFile.fileName, line: pos.line, column: pos.character };
       }
     }
+    // Unwrap arrays to get element type
+    if (checker.isArrayType(tsType)) {
+      const typeArgs = checker.getTypeArguments(tsType as ts.TypeReference);
+      if (typeArgs[0]) tsType = typeArgs[0];
+    }
+
+    const prop = tsType.getProperty(propName);
+    if (!prop) return undefined;
+    declaration = prop.valueDeclaration ?? prop.declarations?.[0];
+    if (!declaration) return undefined;
+    tsType = checker.getTypeOfSymbolAtLocation(prop, declaration);
+  }
+
+  if (declaration) {
+    const declSourceFile = declaration.getSourceFile();
+    const pos = declSourceFile.getLineAndCharacterOfPosition(declaration.getStart());
+    return { filePath: declSourceFile.fileName, line: pos.line, column: pos.character };
   }
 
   return undefined;

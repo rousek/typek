@@ -1,13 +1,18 @@
-{{#import PageLayout from "./types"}}
+{{#import PageLayout from "../models/types"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>{{title}}</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; color: #333; }
     header { border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 24px; }
     footer { border-top: 1px solid #eee; padding-top: 16px; margin-top: 24px; color: #888; font-size: 0.9em; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f8f8f8; }
+    a { color: #2a7; text-decoration: none; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>

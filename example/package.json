@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "compile": "typek compile",
+    "compile": "typku compile",
     "render": "tsx src/render.ts",
     "build": "pnpm compile && pnpm render",
-    "clean": "typek clean && rm -rf dist out"
+    "clean": "typku clean && rm -rf dist out"
   },
   "dependencies": {
     "@typek/cli": "workspace:*",

@@ -1,5 +1,5 @@
-{{#import StorePage from "./types"}}
-{{#layout "./layout.html.tk" layout}}
+{{#import StorePage from "../models/types"}}
+{{#layout "../layouts/layout.html.tk" layout}}
 <style>
   .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
   .product { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
@@ -38,10 +38,12 @@
 <h2>All Products</h2>
 <div class="products">
   {{#for product in products}}
-  {{> "./product-card.html.tk" product }}
+  {{> "../partials/product-card.html.tk" product }}
   {{#empty}}
   <p>No products available yet. Check back soon!</p>
   {{/empty}}
   {{/for}}
 </div>
+
+{{> "../partials/comment-form.html.tk"}}
 {{/layout}}

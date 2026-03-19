@@ -1,0 +1,10 @@
+<div class="comment-form">
+  <h3>Leave a Comment</h3>
+  <form>
+    <label for="comment-name">Name</label>
+    <input type="text" id="comment-name" placeholder="Your name" required>
+    <label for="comment-text">Comment</label>
+    <textarea id="comment-text" rows="4" placeholder="Write your comment..." required></textarea>
+    <button type="submit">Post Comment</button>
+  </form>
+</div>

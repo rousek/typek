@@ -1,0 +1,21 @@
+{{#import EmailData from "../models/types"}}
+{{#layout "../layouts/layout.html.tk" layout}}
+<style>
+  .email-content { line-height: 1.6; }
+  .email-content p { margin: 16px 0; }
+  .email-footer { color: #888; font-size: 0.85em; margin-top: 30px; }
+  .email-footer a { color: #666; }
+</style>
+
+<div class="email-content">
+  <p>{{greeting}}</p>
+  <p>{{body}}</p>
+</div>
+
+{{> "../partials/comment-form.html.tk"}}
+
+<div class="email-footer">
+  <p>{{footerText}}</p>
+  <p><a href="{{unsubscribeUrl}}">Unsubscribe</a></p>
+</div>
+{{/layout}}
