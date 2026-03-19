@@ -250,20 +250,62 @@ function getHover(document: vscode.TextDocument, position: vscode.Position): vsc
   return new vscode.Hover(markdown, range);
 }
 
+function getFilePathDefinition(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
+  const lineText = document.lineAt(position.line).text;
+  const col = position.character;
+  const templateDir = path.dirname(document.uri.fsPath);
+
+  // Find the string literal (single or double quoted) the cursor is inside
+  const stringRegex = /["']([^"']+)["']/g;
+  let match;
+  while ((match = stringRegex.exec(lineText)) !== null) {
+    const start = match.index + 1; // after opening quote
+    const end = start + match[1].length;
+    if (col >= start && col <= end) {
+      const filePath = match[1];
+
+      // {{#import Type from "./path"}} — resolve as .ts file
+      if (lineText.match(/\{\{#import\s+\w+\s+from\s+/)) {
+        const resolved = path.resolve(templateDir, filePath.endsWith(".ts") ? filePath : filePath + ".ts");
+        if (fs.existsSync(resolved)) {
+          return new vscode.Location(vscode.Uri.file(resolved), new vscode.Position(0, 0));
+        }
+      }
+
+      // {{#layout "./path.tk" ...}} or {{> "./path.tk" ...}} — resolve as .tk file
+      if (lineText.match(/\{\{#layout\s+/) || lineText.match(/\{\{>\s+/)) {
+        const resolved = path.resolve(templateDir, filePath);
+        if (fs.existsSync(resolved)) {
+          return new vscode.Location(vscode.Uri.file(resolved), new vscode.Position(0, 0));
+        }
+      }
+    }
+  }
+
+  return undefined;
+}
+
 function getDefinition(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
   if (!isTypekDocument(document)) return undefined;
 
+  // Check for file path definitions first (import, layout, partial paths)
+  const filePathDef = getFilePathDefinition(document, position);
+  if (filePathDef) return filePathDef;
+
+  // Fall back to property definition via type resolution
   const resolved = resolveDataType(document);
   if (!resolved) return undefined;
 
   const result = typeAtPosition(resolved.ast, resolved.dataType, position.line, position.character);
   if (!result) return undefined;
 
-  const { typeName, from } = resolved.ast.typeDirective;
-  const templateDir = path.dirname(document.uri.fsPath);
-  const typeFilePath = path.resolve(templateDir, from.endsWith(".ts") ? from : from + ".ts");
+  const dir = resolved.ast.typeDirective;
+  if (!dir) return undefined;
 
-  const decl = findDeclaration(typeFilePath, typeName, result.propertyPath);
+  const templateDir = path.dirname(document.uri.fsPath);
+  const typeFilePath = path.resolve(templateDir, dir.from.endsWith(".ts") ? dir.from : dir.from + ".ts");
+
+  const decl = findDeclaration(typeFilePath, dir.typeName, result.propertyPath);
   if (!decl) return undefined;
 
   const uri = vscode.Uri.file(decl.filePath);
