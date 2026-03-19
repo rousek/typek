@@ -22,6 +22,10 @@ export interface CompileOptions {
 export interface CompileResult {
   code: string;
   diagnostics: Diagnostic[];
+  /** True if this template uses {{@content}} (is a layout template) */
+  isLayout: boolean;
+  /** Paths of layout templates referenced by {{#layout}} blocks */
+  layoutDeps: string[];
 }
 
 function getEscapeMode(filename: string): "html" | "none" {
@@ -55,10 +59,23 @@ export function compile(options: CompileOptions): CompileResult {
 
   let loopCounter = 0;
   let withCounter = 0;
+  let layoutCounter = 0;
+  let partialCounter = 0;
   // Stack to track loop variable names for nested loops
   const loopVarStack: Array<{ variable: string; arrVar: string; indexVar: string }> = [];
   // Stack to track scope variables for {{#with}} blocks
   const scopeVarStack: string[] = ["data"];
+  // Stack to track output variable (for layout content accumulation)
+  const outputVarStack: string[] = ["__out"];
+  // Layout and partial imports collected during compilation
+  const layoutImports: Array<{ varName: string; importPath: string }> = [];
+  const partialImports: Array<{ varName: string; importPath: string }> = [];
+  // Track whether this template uses {{@content}}
+  let hasContentTag = false;
+
+  function currentOutputVar(): string {
+    return outputVarStack[outputVarStack.length - 1];
+  }
 
   function currentScopeVar(): string {
     return scopeVarStack[scopeVarStack.length - 1];
@@ -103,20 +120,21 @@ export function compile(options: CompileOptions): CompileResult {
   }
 
   function compileNode(node: ASTNode): string {
+    const out = currentOutputVar();
     switch (node.type) {
       case NodeType.Text:
-        return `__out += ${JSON.stringify(node.value)};\n`;
+        return `${out} += ${JSON.stringify(node.value)};\n`;
 
       case NodeType.Expression: {
         const expr = compileExpr(node.expression);
         if (escapeMode === "html") {
-          return `__out += __escapeHtml(String(${expr}));\n`;
+          return `${out} += __escapeHtml(String(${expr}));\n`;
         }
-        return `__out += String(${expr});\n`;
+        return `${out} += String(${expr});\n`;
       }
 
       case NodeType.RawExpression:
-        return `__out += String(${compileExpr(node.expression)});\n`;
+        return `${out} += String(${compileExpr(node.expression)});\n`;
 
       case NodeType.IfBlock:
         return compileIfBlock(node);
@@ -138,6 +156,13 @@ export function compile(options: CompileOptions): CompileResult {
 
       case NodeType.MetaVariable:
         return compileMetaVariable(node);
+
+      case NodeType.LayoutBlock:
+        return compileLayoutBlock(node);
+
+      case NodeType.Content:
+        hasContentTag = true;
+        return `${out} += __content;\n`;
 
       default:
         return "";
@@ -245,31 +270,56 @@ export function compile(options: CompileOptions): CompileResult {
 
   function compilePartial(node: ASTNode): string {
     if (node.type !== NodeType.Partial) return "";
-    const propsEntries = Object.entries(node.props)
-      .map(([key, value]) => `${key}: ${compileExpr(value)}`)
-      .join(", ");
+    const out = currentOutputVar();
+    const n = partialCounter++;
+    const partialVar = `__partial_${n}`;
+    const importPath = node.path.replace(/\.tk$/, "");
 
-    return `__out += ${node.name}.render({ ${propsEntries} });\n`;
+    partialImports.push({ varName: partialVar, importPath });
+
+    return `${out} += ${partialVar}(${compileExpr(node.dataExpr)});\n`;
   }
 
   function compileMetaVariable(node: ASTNode): string {
     if (node.type !== NodeType.MetaVariable) return "";
+    const out = currentOutputVar();
     const ctx = getLoopContext();
     if (!ctx) return "";
 
     switch (node.name) {
       case "@index":
-        return `__out += String(${ctx.indexVar});\n`;
+        return `${out} += String(${ctx.indexVar});\n`;
       case "@first":
-        return `__out += String(${ctx.indexVar} === 0);\n`;
+        return `${out} += String(${ctx.indexVar} === 0);\n`;
       case "@last":
-        return `__out += String(${ctx.indexVar} === ${ctx.arrVar}.length - 1);\n`;
+        return `${out} += String(${ctx.indexVar} === ${ctx.arrVar}.length - 1);\n`;
       case "@length":
-        return `__out += String(${ctx.arrVar}.length);\n`;
+        return `${out} += String(${ctx.arrVar}.length);\n`;
       default:
         return "";
     }
   }
+
+  function compileLayoutBlock(node: ASTNode): string {
+    if (node.type !== NodeType.LayoutBlock) return "";
+    const n = layoutCounter++;
+    const layoutVar = `__layout_${n}`;
+    const contentVar = `__layout_content_${n}`;
+    const importPath = node.path.replace(/\.tk$/, "");
+
+    layoutImports.push({ varName: layoutVar, importPath });
+
+    let code = `let ${contentVar} = "";\n`;
+    outputVarStack.push(contentVar);
+    code += compileBody(node.body);
+    outputVarStack.pop();
+    code += `${currentOutputVar()} += ${layoutVar}(${compileExpr(node.dataExpr)}, ${contentVar});\n`;
+
+    return code;
+  }
+
+  // Compile the body first so we collect layout imports and detect @content
+  const bodyCode = compileBody(ast.body);
 
   // Build the output module
   let code = `// Auto-generated by Typek — do not edit\n`;
@@ -279,12 +329,24 @@ export function compile(options: CompileOptions): CompileResult {
     code += `import { escapeHtml as __escapeHtml } from "@typek/runtime";\n`;
   }
 
+  for (const { varName, importPath } of layoutImports) {
+    code += `import ${varName} from "${importPath}";\n`;
+  }
+
+  for (const { varName, importPath } of partialImports) {
+    code += `import ${varName} from "${importPath}";\n`;
+  }
+
   code += `\n`;
-  code += `export default function render(data: ${typeName}): string {\n`;
+  if (hasContentTag) {
+    code += `export default function render(data: ${typeName}, __content: string = ""): string {\n`;
+  } else {
+    code += `export default function render(data: ${typeName}): string {\n`;
+  }
   code += `let __out = "";\n`;
-  code += compileBody(ast.body);
+  code += bodyCode;
   code += `return __out;\n`;
   code += `}\n`;
 
-  return { code, diagnostics };
+  return { code, diagnostics, isLayout: hasContentTag, layoutDeps: layoutImports.map(l => l.importPath) };
 }

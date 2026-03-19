@@ -1,0 +1,20 @@
+{{#import Product from "./types"}}
+<div class="product">
+  <img src="{{imageUrl}}" alt="{{name}}">
+  <h3>{{name}}</h3>
+  <p class="category">{{category}}</p>
+  <p>{{description}}</p>
+  <span class="price">${{price}}</span>
+
+  {{#if inStock}}
+  <p>In Stock</p>
+  {{#else}}
+  <p class="out-of-stock">Out of Stock</p>
+  {{/if}}
+
+  <div>
+    {{#for tag in tags}}
+    <span class="tag">{{tag}}</span>
+    {{/for}}
+  </div>
+</div>

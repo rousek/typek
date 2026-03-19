@@ -274,8 +274,15 @@ export function typeAtPosition(
         return undefined;
       }
       case NodeType.Partial: {
-        for (const expr of Object.values(node.props)) {
-          const r = findInExpr(expr);
+        const r = findInExpr(node.dataExpr);
+        if (r) return r;
+        return undefined;
+      }
+      case NodeType.LayoutBlock: {
+        const dataResult = findInExpr(node.dataExpr);
+        if (dataResult) return dataResult;
+        for (const child of node.body) {
+          const r = findInNode(child);
           if (r) return r;
         }
         return undefined;
@@ -438,6 +445,13 @@ export function completionsAtPosition(
             const r = searchNode(child);
             if (r) return r;
           }
+        }
+        return null;
+      }
+      case NodeType.LayoutBlock: {
+        for (const child of node.body) {
+          const r = searchNode(child);
+          if (r) return r;
         }
         return null;
       }

@@ -32,8 +32,9 @@ Misspell `{{naem}}`? The compiler tells you: `Property 'naem' does not exist on 
 
 - **Type-checked templates** — errors at compile time, not runtime
 - **Compiles to TypeScript** — each `.tk` file becomes a `render(data: T): string` function
-- **VS Code extension** — diagnostics, hover type info, autocomplete for properties/tags/imports
-- **Familiar syntax** — `{{#if}}`, `{{#for}}`, `{{#switch}}`, `{{#with}}`
+- **Layout templates** — wrap content with reusable layouts via `{{#layout}}` and `{{@content}}`
+- **VS Code extension** — diagnostics, hover type info, Go to Definition, autocomplete for properties/tags/imports
+- **Familiar syntax** — `{{#if}}`, `{{#for}}`, `{{#switch}}`, `{{#with}}`, `{{#layout}}`
 - **HTML auto-escaping** — `.html.tk` files escape output by default, `{{{raw}}}` for unescaped
 - **Whitespace control** — `{{~ expr ~}}` strips surrounding whitespace
 
@@ -101,12 +102,56 @@ Scopes into a nested property. Only renders if the value is truthy.
 ```
 {{#with address}}
   {{street}}, {{city}}
+  {{./street}}           Explicitly reference current scope with ./
   {{../name}}            Access parent scope with ../
 {{#empty}}
   No address on file.
 {{/empty}}
 {{/with}}
 ```
+
+The `../` prefix can be chained (`../../name`) to go up multiple levels. The compiler validates that the depth does not exceed the number of available scope levels.
+
+### Layout Templates
+
+Wrap content with reusable layouts using `{{#layout}}` and `{{@content}}`.
+
+**Layout** (`layout.html.tk`):
+```
+{{#import PageLayout from "./types"}}
+<html>
+<head><title>{{title}}</title></head>
+<body>
+  {{@content}}
+</body>
+</html>
+```
+
+**Page** (`store.html.tk`):
+```
+{{#import StorePage from "./types"}}
+{{#layout "./layout.html.tk" layoutData}}
+<main>
+  <h1>{{title}}</h1>
+</main>
+{{/layout}}
+```
+
+- The first argument is the path to the layout template
+- The second argument is the data expression passed to the layout's render function
+- Multiple `{{#layout}}` blocks can appear in one template
+- Only one `{{@content}}` is allowed per layout template
+- The compiler validates that layout templates contain `{{@content}}`
+
+### Partials
+
+Render another template inline:
+
+```
+{{> "./product-card.html.tk" product}}
+```
+
+The first argument is the path to the partial template, the second is the data passed to its render function. The partial is a regular `.tk` template with its own `{{#import}}` directive.
 
 ### Other
 
@@ -115,7 +160,6 @@ Scopes into a nested property. Only renders if the value is truthy.
 {{#raw}}{{ not parsed }}{{/raw}}
 {{~ expr ~}}            Whitespace stripping
 \{{ escaped braces \}}
-{{> partial prop=value}} Partials
 ```
 
 ## Getting Started
@@ -137,9 +181,9 @@ This finds all `.tk` files in your source directory, type-checks them, and outpu
 ### Use in code
 
 ```typescript
-import { render } from "./user-card.html.js";
+import renderUser from "@typek/render/user-card.html";
 
-const html = render({
+const html = renderUser({
   name: "Alice",
   email: "alice@example.com",
   isActive: true,
@@ -150,8 +194,10 @@ const html = render({
 
 Install the **Typek** extension for:
 - Real-time type error diagnostics
-- Hover to see types (`interface User { name: string; ... }`)
+- Hover to see types (`user: User | null`)
+- Go to Definition (Ctrl+Click) on properties to jump to TypeScript source
 - Autocomplete for properties, tag names, and import paths
+- Tag help popups for all block tags and meta variables
 - Syntax highlighting
 
 ## Project Structure

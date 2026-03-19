@@ -72,6 +72,10 @@ export const storeData: StorePage = {
   products: [laptop, jacket, novel, coffee, headphones, sneakers],
   featuredProduct: laptop,
   categories: ["electronics", "clothing", "books", "food"],
+  layout: {
+    title: "TechStyle Store",
+    heading: "Welcome to TechStyle",
+  },
 };
 
 export const cartData: CartPage = {

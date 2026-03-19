@@ -35,6 +35,7 @@ export interface StorePage {
   products: Product[];
   featuredProduct: Product | null;
   categories: string[];
+  layout: PageLayout;
 }
 
 export interface CartPage {
@@ -57,6 +58,11 @@ export interface Order {
   total: number;
   status: "pending" | "shipped" | "delivered" | "cancelled";
   items: CartItem[];
+}
+
+export interface PageLayout {
+  title: string;
+  heading: string;
 }
 
 export interface EmailData {

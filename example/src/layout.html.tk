@@ -1,0 +1,24 @@
+{{#import PageLayout from "./types"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header { border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 24px; }
+    footer { border-top: 1px solid #eee; padding-top: 16px; margin-top: 24px; color: #888; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>{{heading}}</h1>
+  </header>
+  <main>
+    {{@content}}
+  </main>
+  <footer>
+    <p>Typek Store &copy; 2026</p>
+  </footer>
+</body>
+</html>

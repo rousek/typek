@@ -148,6 +148,10 @@ const TAG_HELP: Record<string, { syntax: string; description: string }> = {
     syntax: "{{#with expression}}...{{#empty}}...{{/empty}}{{/with}}",
     description: "Scopes into a nested property. Inside the block, identifiers resolve against the expression's type. Use `../` to access the parent scope. Only renders if the value is truthy; use `{{#empty}}` for the fallback.",
   },
+  "layout": {
+    syntax: '{{#layout "./layout.html.tk" data}}...{{/layout}}',
+    description: "Wraps content with a layout template. The layout template must contain `{{@content}}` to mark where the wrapped content is inserted. The second argument is the data passed to the layout's render function.",
+  },
 };
 
 function getTagHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
@@ -187,7 +191,7 @@ function getTagHover(document: vscode.TextDocument, position: vscode.Position): 
   }
 
   // Match meta variables: {{@name}}
-  const metaPattern = /\{\{\s*(@(?:index|first|last|length))\s*\}\}/g;
+  const metaPattern = /\{\{\s*(@(?:index|first|last|length|content))\s*\}\}/g;
   while ((match = metaPattern.exec(line)) !== null) {
     const name = match[1];
     const start = match.index + match[0].indexOf(name);
@@ -200,7 +204,22 @@ function getTagHover(document: vscode.TextDocument, position: vscode.Position): 
         "@first": "`true` on the first iteration.",
         "@last": "`true` on the last iteration.",
         "@length": "Total number of items in the collection.",
+        "@content": "Outputs the wrapped content passed by a `{{#layout}}` block. Only one `{{@content}}` is allowed per template.",
       }[name] ?? "");
+      const range = new vscode.Range(position.line, start, position.line, end);
+      return new vscode.Hover(md, range);
+    }
+  }
+
+  // Match partial tag: {{>
+  const partialPattern = /\{\{>/g;
+  while ((match = partialPattern.exec(line)) !== null) {
+    const start = match.index;
+    const end = start + 3;
+    if (col >= start && col < end) {
+      const md = new vscode.MarkdownString();
+      md.appendCodeblock('{{> "./partial.html.tk" data}}', "typek");
+      md.appendMarkdown("Renders a partial template inline. The first argument is the path to the partial template, the second is the data passed to its render function.");
       const range = new vscode.Range(position.line, start, position.line, end);
       return new vscode.Hover(md, range);
     }
@@ -260,7 +279,7 @@ function getCompletions(document: vscode.TextDocument, position: vscode.Position
   // 1. Tag name completion after {{# or {{/
   const blockMatch = textBefore.match(/\{\{#(\w*)$/);
   if (blockMatch) {
-    const tags = ["if", "for", "with", "switch", "case", "default", "empty", "raw", "else"];
+    const tags = ["if", "for", "with", "switch", "case", "default", "empty", "raw", "else", "layout"];
     return tags.map((tag) => {
       const item = new vscode.CompletionItem(tag, vscode.CompletionItemKind.Keyword);
       const help = TAG_HELP[tag];
@@ -270,7 +289,7 @@ function getCompletions(document: vscode.TextDocument, position: vscode.Position
   }
   const closeMatch = textBefore.match(/\{\{\/(\w*)$/);
   if (closeMatch) {
-    const tags = ["if", "for", "with", "switch", "case", "default", "empty", "raw"];
+    const tags = ["if", "for", "with", "switch", "case", "default", "empty", "raw", "layout"];
     return tags.map((tag) => {
       const item = new vscode.CompletionItem(tag, vscode.CompletionItemKind.Keyword);
       return item;

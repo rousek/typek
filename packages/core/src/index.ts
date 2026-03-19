@@ -23,6 +23,8 @@ export {
   type CommentNode,
   type PartialNode,
   type MetaVariableNode,
+  type LayoutBlockNode,
+  type ContentNode,
 } from "./parser.js";
 export {
   TypeKind,

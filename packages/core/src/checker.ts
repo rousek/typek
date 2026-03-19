@@ -249,12 +249,15 @@ export function typecheck(ast: TemplateAST, dataType: Type): Diagnostic[] {
       }
 
       case NodeType.Partial:
-        for (const expr of Object.values(node.props)) {
-          resolveExprType(expr);
-        }
+        resolveExprType(node.dataExpr);
         break;
 
-      // Text, Comment, MetaVariable — no type checking needed
+      case NodeType.LayoutBlock:
+        resolveExprType(node.dataExpr);
+        node.body.forEach(checkNode);
+        break;
+
+      // Text, Comment, MetaVariable, Content — no type checking needed
       default:
         break;
     }

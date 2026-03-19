@@ -30,6 +30,8 @@ export enum NodeType {
   Comment,
   Partial,
   MetaVariable,
+  LayoutBlock,
+  Content,
 }
 
 export interface TextNode {
@@ -153,8 +155,8 @@ export interface CommentNode {
 
 export interface PartialNode {
   type: NodeType.Partial;
-  name: string;
-  props: Record<string, ExprNode>;
+  path: string;
+  dataExpr: ExprNode;
   line: number;
   column: number;
 }
@@ -162,6 +164,21 @@ export interface PartialNode {
 export interface MetaVariableNode {
   type: NodeType.MetaVariable;
   name: string;
+  line: number;
+  column: number;
+}
+
+export interface LayoutBlockNode {
+  type: NodeType.LayoutBlock;
+  path: string;
+  dataExpr: ExprNode;
+  body: ASTNode[];
+  line: number;
+  column: number;
+}
+
+export interface ContentNode {
+  type: NodeType.Content;
   line: number;
   column: number;
 }
@@ -184,7 +201,9 @@ export type ASTNode =
   | WithBlockNode
   | CommentNode
   | PartialNode
-  | MetaVariableNode;
+  | MetaVariableNode
+  | LayoutBlockNode
+  | ContentNode;
 
 export interface TypeDirective {
   typeName: string;
@@ -196,6 +215,8 @@ export interface TypeDirective {
 export interface TemplateAST {
   typeDirective: TypeDirective;
   body: ASTNode[];
+  /** True if the template contains {{@content}} (is a layout template) */
+  hasContent: boolean;
 }
 
 const PRECEDENCE: Record<string, number> = {
@@ -242,6 +263,7 @@ export function parse(template: string): TemplateAST {
   const tokens = tokenize(template);
   let pos = 0;
   let insideForBlock = false;
+  let contentTagSeen: { line: number; column: number } | null = null;
 
   function current(): Token | undefined {
     return tokens[pos];
@@ -371,10 +393,10 @@ export function parse(template: string): TemplateAST {
       return { type: NodeType.StringLiteral, value: t.value, line: t.line, column: t.column };
     }
 
-    if (t.type === TokenType.DotDotSlash) {
-      let depth = 1;
+    if (t.type === TokenType.DotSlash || t.type === TokenType.DotDotSlash) {
+      let depth = t.type === TokenType.DotDotSlash ? 1 : 0;
       const startToken = t;
-      pos++; // skip first ../
+      pos++; // skip first ./ or ../
       while (peekType() === TokenType.DotDotSlash) {
         depth++;
         pos++;
@@ -391,7 +413,7 @@ export function parse(template: string): TemplateAST {
       return node;
     }
 
-    if (t.type === TokenType.Identifier) {
+    if (t.type === TokenType.Identifier || t.type === TokenType.BlockName || t.type === TokenType.From || t.type === TokenType.In) {
       pos++;
       let node: ExprNode = { type: NodeType.Identifier, name: t.value, depth: 0, line: t.line, column: t.column };
 
@@ -460,6 +482,24 @@ export function parse(template: string): TemplateAST {
           continue;
         }
 
+        // Check for {{@content}}
+        if (peekType() === TokenType.Identifier && current()!.value === "@content") {
+          const contentToken = advance();
+          if (contentTagSeen) {
+            throw new ParseError(
+              "Only one {{@content}} is allowed per template",
+              t.line, t.column, 2 + "@content".length + 2,
+            );
+          }
+          contentTagSeen = { line: contentToken.line, column: contentToken.column };
+          if (peekType() === TokenType.WhitespaceStrip) {
+            pos++;
+          }
+          expect(TokenType.CloseExpression);
+          body.push({ type: NodeType.Content, line: contentToken.line, column: contentToken.column });
+          continue;
+        }
+
         const expression = collectExpressionTokens();
 
         if (peekType() === TokenType.WhitespaceStrip) {
@@ -493,21 +533,10 @@ export function parse(template: string): TemplateAST {
         body.push({ type: NodeType.Comment, value: commentText, line: t.line, column: t.column });
       } else if (t.type === TokenType.OpenPartial) {
         pos++; // skip {{>
-        const nameToken = expect(TokenType.Identifier);
-        const props: Record<string, ExprNode> = {};
-
-        // Parse props: key=value pairs
-        while (peekType() === TokenType.Identifier) {
-          const keyToken = advance();
-          if (peekType() === TokenType.Assign) {
-            pos++; // skip =
-            const value = collectExpressionTokens();
-            props[keyToken.value] = value;
-          }
-        }
-
+        const pathToken = expect(TokenType.StringLiteral);
+        const dataExpr = collectExpressionTokens();
         expect(TokenType.CloseExpression);
-        body.push({ type: NodeType.Partial, name: nameToken.value, props, line: t.line, column: t.column });
+        body.push({ type: NodeType.Partial, path: pathToken.value, dataExpr, line: t.line, column: t.column });
       } else if (t.type === TokenType.OpenBlock) {
         pos++; // skip {{# or {{~#
         const stripLeading = t.value === "{{~#";
@@ -533,6 +562,9 @@ export function parse(template: string): TemplateAST {
             break;
           case "switch":
             body.push(parseSwitchBlock(t.line, t.column));
+            break;
+          case "layout":
+            body.push(parseLayoutBlock(t.line, t.column));
             break;
           case "raw": {
             // Raw block content is already handled by lexer as Text tokens
@@ -888,6 +920,35 @@ export function parse(template: string): TemplateAST {
     };
   }
 
+  function parseLayoutBlock(blockLine = 0, blockColumn = 0): LayoutBlockNode {
+    const pathToken = expect(TokenType.StringLiteral);
+    const dataExpr = collectExpressionTokens();
+    expect(TokenType.CloseExpression);
+
+    const body = parseBody(new Set());
+
+    // Expect {{/layout}}
+    if (peekType() === TokenType.CloseBlock) {
+      pos++; // skip {{/
+      const closeBlockName = expect(TokenType.BlockName);
+      if (closeBlockName.value !== "layout") {
+        throw new ParseError(`Expected {{/layout}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
+      }
+      expect(TokenType.CloseExpression);
+    } else {
+      throw new ParseError("Unclosed {{#layout}} block — missing {{/layout}}", blockLine, blockColumn, 10);
+    }
+
+    return {
+      type: NodeType.LayoutBlock,
+      path: pathToken.value,
+      dataExpr,
+      body,
+      line: blockLine,
+      column: blockColumn,
+    };
+  }
+
   // Main parse logic
   const typeDirective = parseTypeDirective();
   checkNoDuplicateDirective();
@@ -918,7 +979,7 @@ export function parse(template: string): TemplateAST {
 
   stripStandaloneWhitespace(body);
 
-  return { typeDirective, body };
+  return { typeDirective, body, hasContent: contentTagSeen !== null };
 }
 
 // --- Standalone line stripping ---
@@ -931,6 +992,7 @@ function isBlockNode(node: ASTNode): boolean {
     node.type === NodeType.ForBlock ||
     node.type === NodeType.SwitchBlock ||
     node.type === NodeType.WithBlock ||
+    node.type === NodeType.LayoutBlock ||
     node.type === NodeType.Comment
   );
 }
@@ -965,6 +1027,8 @@ function getBlockBodies(node: ASTNode): ASTNode[][] {
       if (node.emptyBlock) bodies.push(node.emptyBlock);
       return bodies;
     }
+    case NodeType.LayoutBlock:
+      return [node.body];
     default:
       return [];
   }

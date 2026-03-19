@@ -66,6 +66,9 @@ export function compileAll(checkOnly = false): void {
 
   let errors = 0;
 
+  // Track which templates are layouts and which reference layouts
+  const compiledTemplates = new Map<string, { relativePath: string; isLayout: boolean; layoutDeps: string[] }>();
+
   for (const templatePath of templateFiles) {
     const relativePath = path.relative(sourceRoot, templatePath);
     const outputRelative = relativePath.replace(/\.tk$/, ".ts");
@@ -78,6 +81,12 @@ export function compileAll(checkOnly = false): void {
         filename: path.basename(templatePath),
         templatePath,
         typecheck: true,
+      });
+
+      compiledTemplates.set(templatePath, {
+        relativePath,
+        isLayout: result.isLayout,
+        layoutDeps: result.layoutDeps,
       });
 
       if (result.diagnostics.length > 0) {
@@ -101,6 +110,24 @@ export function compileAll(checkOnly = false): void {
     } catch (err) {
       errors++;
       console.error(`  error in ${relativePath}: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+
+  // Validate layout usage
+  const layoutFiles = new Set<string>();
+  for (const [filePath, info] of compiledTemplates) {
+    if (info.isLayout) layoutFiles.add(filePath);
+  }
+
+  for (const [filePath, info] of compiledTemplates) {
+    // Check that {{#layout}} references point to templates with {{@content}}
+    for (const dep of info.layoutDeps) {
+      const resolvedDep = path.resolve(path.dirname(filePath), dep + ".tk");
+      const depInfo = compiledTemplates.get(resolvedDep);
+      if (depInfo && !depInfo.isLayout) {
+        errors++;
+        console.error(`  error in ${info.relativePath}: layout "${dep}" does not contain {{@content}}`);
+      }
     }
   }
 

@@ -41,7 +41,7 @@
   <div class="coupon">Coupon applied: <strong>{{couponCode}}</strong></div>
   {{/if}}
 
-  {{#with items}}
+  {{#if items}}
   {{! rendered only if cart is not empty }}
   <table>
     <thead>
@@ -58,13 +58,13 @@
       </tr>
     </thead>
     <tbody>
-    {{#for item in ../items}}
+    {{#for item in items}}
       <tr>
         <td>{{item.product.name}}</td>
         <td>{{item.product.category}}</td>
-        <td>{{../currency}}{{item.product.price}}</td>
+        <td>{{currency}}{{item.product.price}}</td>
         <td>{{item.quantity}}</td>
-        <td>{{../currency}}{{item.product.price * item.quantity}}</td>
+        <td>{{currency}}{{item.product.price * item.quantity}}</td>
         <td>{{ @index }}</td>
         <td>{{ @first }}</td>
         <td>{{ @last }}</td>
@@ -73,12 +73,11 @@
     {{/for}}
     </tbody>
   </table>
-  {{#empty}}
+  {{#else}}
   <div class="empty-cart">
     <h2>Your cart is empty</h2>
     <p>Browse our store to find something you like!</p>
   </div>
-  {{/empty}}
-  {{/with}}
+  {{/if}}
 </body>
 </html>
