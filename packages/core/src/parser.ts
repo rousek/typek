@@ -667,30 +667,41 @@ export function parse(template: string): TemplateAST {
     const prevInsideForBlock = insideForBlock;
     insideForBlock = true;
 
-    const body = parseBody(new Set(["empty"]));
-
+    // Parse body, allowing {{#empty}} to appear at any position.
+    // Content before and after {{#empty}}...{{/empty}} is the loop body.
+    const body: ASTNode[] = [];
     let emptyBlock: ASTNode[] | null = null;
 
-    // Check for {{#empty}}
-    if (peekType() === TokenType.OpenBlock) {
-      const nextToken = tokens[pos + 1];
-      if (nextToken && nextToken.type === TokenType.BlockName && nextToken.value === "empty") {
-        pos++; // skip {{#
-        pos++; // skip "empty" BlockName
-        if (peekType() === TokenType.CloseExpression) pos++;
+    while (pos < tokens.length) {
+      // Check for {{/for}}
+      if (peekType() === TokenType.CloseBlock) break;
 
-        emptyBlock = parseBody(new Set());
+      // Check for {{#empty}}
+      if (peekType() === TokenType.OpenBlock) {
+        const nextToken = tokens[pos + 1];
+        if (nextToken && nextToken.type === TokenType.BlockName && nextToken.value === "empty") {
+          pos++; // skip {{#
+          pos++; // skip "empty" BlockName
+          if (peekType() === TokenType.CloseExpression) pos++;
 
-        // Expect {{/empty}}
-        if (peekType() === TokenType.CloseBlock) {
-          pos++; // skip {{/
-          const closeBlockName = expect(TokenType.BlockName);
-          if (closeBlockName.value !== "empty") {
-            throw new ParseError(`Expected {{/empty}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
+          emptyBlock = parseBody(new Set());
+
+          // Expect {{/empty}}
+          if (peekType() === TokenType.CloseBlock) {
+            pos++; // skip {{/
+            const closeBlockName = expect(TokenType.BlockName);
+            if (closeBlockName.value !== "empty") {
+              throw new ParseError(`Expected {{/empty}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
+            }
+            expect(TokenType.CloseExpression);
           }
-          expect(TokenType.CloseExpression);
+          continue;
         }
       }
+
+      // Parse a chunk of body until next {{#empty}} or {{/for}}
+      const chunk = parseBody(new Set(["empty"]));
+      body.push(...chunk);
     }
 
     // Skip whitespace-only text before {{/for}}
@@ -814,30 +825,40 @@ export function parse(template: string): TemplateAST {
     const expression = collectExpressionTokens();
     expect(TokenType.CloseExpression);
 
-    const body = parseBody(new Set(["empty"]));
-
+    // Parse body, allowing {{#empty}} to appear at any position.
+    const body: ASTNode[] = [];
     let emptyBlock: ASTNode[] | null = null;
 
-    // Check for {{#empty}}
-    if (peekType() === TokenType.OpenBlock) {
-      const nextToken = tokens[pos + 1];
-      if (nextToken && nextToken.type === TokenType.BlockName && nextToken.value === "empty") {
-        pos++; // skip {{#
-        pos++; // skip "empty" BlockName
-        if (peekType() === TokenType.CloseExpression) pos++;
+    while (pos < tokens.length) {
+      // Check for {{/with}}
+      if (peekType() === TokenType.CloseBlock) break;
 
-        emptyBlock = parseBody(new Set());
+      // Check for {{#empty}}
+      if (peekType() === TokenType.OpenBlock) {
+        const nextToken = tokens[pos + 1];
+        if (nextToken && nextToken.type === TokenType.BlockName && nextToken.value === "empty") {
+          pos++; // skip {{#
+          pos++; // skip "empty" BlockName
+          if (peekType() === TokenType.CloseExpression) pos++;
 
-        // Expect {{/empty}}
-        if (peekType() === TokenType.CloseBlock) {
-          pos++; // skip {{/
-          const closeBlockName = expect(TokenType.BlockName);
-          if (closeBlockName.value !== "empty") {
-            throw new ParseError(`Expected {{/empty}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
+          emptyBlock = parseBody(new Set());
+
+          // Expect {{/empty}}
+          if (peekType() === TokenType.CloseBlock) {
+            pos++; // skip {{/
+            const closeBlockName = expect(TokenType.BlockName);
+            if (closeBlockName.value !== "empty") {
+              throw new ParseError(`Expected {{/empty}} but got {{/${closeBlockName.value}}}`, closeBlockName.line, closeBlockName.column, closeBlockName.value.length);
+            }
+            expect(TokenType.CloseExpression);
           }
-          expect(TokenType.CloseExpression);
+          continue;
         }
       }
+
+      // Parse a chunk of body until next {{#empty}} or {{/with}}
+      const chunk = parseBody(new Set(["empty"]));
+      body.push(...chunk);
     }
 
     // Skip whitespace-only text before {{/with}}

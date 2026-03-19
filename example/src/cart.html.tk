@@ -41,17 +41,8 @@
   <div class="coupon">Coupon applied: <strong>{{couponCode}}</strong></div>
   {{/if}}
 
-  {{#for item in items}}
+  {{#with items}}
   {{! rendered only if cart is not empty }}
-  {{#empty}}
-  <div class="empty-cart">
-    <h2>Your cart is empty</h2>
-    <p>Browse our store to find something you like!</p>
-  </div>
-  {{/empty}}
-  {{/for}}
-
-  {{#for item in items}}
   <table>
     <thead>
       <tr>
@@ -60,18 +51,34 @@
         <th>Price</th>
         <th>Qty</th>
         <th>Subtotal</th>
+        <th>Index</th>
+        <th>First</th>
+        <th>Last</th>
+        <th>Total Items</th>
       </tr>
     </thead>
     <tbody>
+    {{#for item in ../items}}
       <tr>
         <td>{{item.product.name}}</td>
         <td>{{item.product.category}}</td>
-        <td>{{currency}}{{item.product.price}}</td>
+        <td>{{../currency}}{{item.product.price}}</td>
         <td>{{item.quantity}}</td>
-        <td>{{currency}}{{item.product.price * item.quantity}}</td>
+        <td>{{../currency}}{{item.product.price * item.quantity}}</td>
+        <td>{{ @index }}</td>
+        <td>{{ @first }}</td>
+        <td>{{ @last }}</td>
+        <td>{{ @length }}</td>
       </tr>
+    {{/for}}
     </tbody>
   </table>
-  {{/for}}
+  {{#empty}}
+  <div class="empty-cart">
+    <h2>Your cart is empty</h2>
+    <p>Browse our store to find something you like!</p>
+  </div>
+  {{/empty}}
+  {{/with}}
 </body>
 </html>
