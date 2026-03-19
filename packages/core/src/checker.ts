@@ -138,6 +138,8 @@ function isAssignable(source: Type, target: Type): boolean {
 interface TemplateTypeResult {
   /** Whether the target template accepts data (has {{#import}}) */
   acceptsData: boolean;
+  /** Whether the target template contains {{@content}} */
+  hasContent: boolean;
   /** The resolved type and name, if data is accepted */
   type?: Type;
   typeName?: string;
@@ -165,19 +167,19 @@ function resolveTemplateType(templateDir: string, refPath: string): TemplateReso
   try {
     ast = parse(template);
   } catch {
-    return { kind: "resolved", result: { acceptsData: false } };
+    return { kind: "resolved", result: { acceptsData: false, hasContent: false } };
   }
 
   const dir = ast.typeDirective;
-  if (!dir) return { kind: "resolved", result: { acceptsData: false } };
+  if (!dir) return { kind: "resolved", result: { acceptsData: false, hasContent: ast.hasContent } };
 
   const typeFileDir = path.dirname(fullPath);
   const typeFilePath = path.resolve(typeFileDir, dir.from.endsWith(".ts") ? dir.from : dir.from + ".ts");
   try {
     const type = resolveType(typeFilePath, dir.typeName);
-    return { kind: "resolved", result: { acceptsData: true, type, typeName: dir.typeName } };
+    return { kind: "resolved", result: { acceptsData: true, hasContent: ast.hasContent, type, typeName: dir.typeName } };
   } catch {
-    return { kind: "resolved", result: { acceptsData: false } };
+    return { kind: "resolved", result: { acceptsData: false, hasContent: ast.hasContent } };
   }
 }
 
@@ -447,6 +449,15 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
                 length: node.path.length,
               });
             }
+            if (target.hasContent) {
+              diagnostics.push({
+                message: `'${node.path}' contains {{@content}} and should be used as a layout, not a partial`,
+                severity: "error",
+                line: node.line,
+                column: node.column,
+                length: node.path.length,
+              });
+            }
           }
         }
         break;
@@ -485,6 +496,15 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
             } else if (!passedType && target.acceptsData) {
               diagnostics.push({
                 message: `Layout '${node.path}' expects data of type '${target.typeName}', but no data was passed`,
+                severity: "error",
+                line: node.line,
+                column: node.column,
+                length: node.path.length,
+              });
+            }
+            if (!target.hasContent) {
+              diagnostics.push({
+                message: `Layout '${node.path}' does not contain {{@content}}. Use a partial instead if no content wrapping is needed`,
                 severity: "error",
                 line: node.line,
                 column: node.column,
