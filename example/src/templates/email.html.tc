@@ -1,5 +1,5 @@
 {{#import EmailData from "../models/types"}}
-{{#layout "../layouts/layout.html.tk" layout}}
+{{#layout "../layouts/layout.html.tc" layout}}
 <style>
   .email-content { line-height: 1.6; }
   .email-content p { margin: 16px 0; }
@@ -12,7 +12,7 @@
   <p>{{body}}</p>
 </div>
 
-{{> "../partials/comment-form.html.tk"}}
+{{> "../partials/comment-form.html.tc"}}
 
 <div class="email-footer">
   <p>{{footerText}}</p>

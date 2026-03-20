@@ -1,11 +1,11 @@
 {
-  "scopeName": "text.typek",
-  "name": "Typek",
+  "scopeName": "text.typecek",
+  "name": "Typecek",
   "patterns": [
-    { "include": "#typek-expressions" }
+    { "include": "#typecek-expressions" }
   ],
   "repository": {
-    "typek-expressions": {
+    "typecek-expressions": {
       "patterns": [
         { "include": "#type-directive" },
         { "include": "#comment" },
@@ -19,141 +19,141 @@
       ]
     },
     "type-directive": {
-      "name": "meta.directive.typek",
+      "name": "meta.directive.typecek",
       "begin": "\\{\\{#(import)\\b",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.directive.typek" },
-        "1": { "name": "keyword.control.import.typek" }
+        "0": { "name": "punctuation.definition.directive.typecek" },
+        "1": { "name": "keyword.control.import.typecek" }
       },
       "end": "\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.directive.typek" }
+        "0": { "name": "punctuation.definition.directive.typecek" }
       },
       "patterns": [
         {
           "match": "\\b(from)\\b",
-          "name": "keyword.control.from.typek"
+          "name": "keyword.control.from.typecek"
         },
         {
           "match": "\"[^\"]*\"|'[^']*'",
-          "name": "string.quoted.typek"
+          "name": "string.quoted.typecek"
         },
         {
           "match": "\\b[A-Z][a-zA-Z0-9_]*\\b",
-          "name": "entity.name.type.typek"
+          "name": "entity.name.type.typecek"
         }
       ]
     },
     "comment": {
-      "name": "comment.block.typek",
+      "name": "comment.block.typecek",
       "begin": "\\{\\{!(?!\\s*@type)",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.comment.begin.typek" }
+        "0": { "name": "punctuation.definition.comment.begin.typecek" }
       },
       "end": "\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.comment.end.typek" }
+        "0": { "name": "punctuation.definition.comment.end.typecek" }
       }
     },
     "raw-block": {
-      "name": "meta.raw-block.typek",
+      "name": "meta.raw-block.typecek",
       "begin": "\\{\\{#raw\\}\\}",
       "beginCaptures": {
-        "0": { "name": "keyword.control.raw.typek" }
+        "0": { "name": "keyword.control.raw.typecek" }
       },
       "end": "\\{\\{/raw\\}\\}",
       "endCaptures": {
-        "0": { "name": "keyword.control.raw.typek" }
+        "0": { "name": "keyword.control.raw.typecek" }
       }
     },
     "raw-expression": {
-      "name": "meta.expression.raw.typek",
+      "name": "meta.expression.raw.typecek",
       "begin": "\\{\\{\\{",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.expression.begin.typek" }
+        "0": { "name": "punctuation.definition.expression.begin.typecek" }
       },
       "end": "\\}\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.expression.end.typek" }
+        "0": { "name": "punctuation.definition.expression.end.typecek" }
       },
       "patterns": [
         { "include": "#expression-content" }
       ]
     },
     "block-close": {
-      "name": "meta.block.close.typek",
+      "name": "meta.block.close.typecek",
       "begin": "\\{\\{/",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.block.end.typek" }
+        "0": { "name": "punctuation.definition.block.end.typecek" }
       },
       "end": "\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.block.end.typek" }
+        "0": { "name": "punctuation.definition.block.end.typecek" }
       },
       "patterns": [
         {
           "match": "\\b(if|for|switch|case|default|empty|raw|with)\\b",
-          "name": "keyword.control.typek"
+          "name": "keyword.control.typecek"
         }
       ]
     },
     "block-open": {
-      "name": "meta.block.open.typek",
+      "name": "meta.block.open.typecek",
       "begin": "\\{\\{~?#",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.block.begin.typek" }
+        "0": { "name": "punctuation.definition.block.begin.typecek" }
       },
       "end": "\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.block.end.typek" }
+        "0": { "name": "punctuation.definition.block.end.typecek" }
       },
       "patterns": [
         {
           "match": "\\b(if|else|for|switch|case|default|empty|with)\\b",
-          "name": "keyword.control.typek"
+          "name": "keyword.control.typecek"
         },
         {
           "match": "\\b(in)\\b",
-          "name": "keyword.operator.typek"
+          "name": "keyword.operator.typecek"
         },
         { "include": "#expression-content" }
       ]
     },
     "partial": {
-      "name": "meta.partial.typek",
+      "name": "meta.partial.typecek",
       "begin": "\\{\\{>",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.partial.begin.typek" }
+        "0": { "name": "punctuation.definition.partial.begin.typecek" }
       },
       "end": "\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.partial.end.typek" }
+        "0": { "name": "punctuation.definition.partial.end.typecek" }
       },
       "patterns": [
         {
           "match": "\\b[a-zA-Z_][a-zA-Z0-9_-]*\\b",
-          "name": "entity.name.function.partial.typek"
+          "name": "entity.name.function.partial.typecek"
         },
         {
           "match": "=",
-          "name": "keyword.operator.assignment.typek"
+          "name": "keyword.operator.assignment.typecek"
         },
         { "include": "#expression-content" }
       ]
     },
     "escaped-braces": {
       "match": "\\\\\\{\\{|\\\\\\}\\}",
-      "name": "constant.character.escape.typek"
+      "name": "constant.character.escape.typecek"
     },
     "expression": {
-      "name": "meta.expression.typek",
+      "name": "meta.expression.typecek",
       "begin": "\\{\\{~?",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.expression.begin.typek" }
+        "0": { "name": "punctuation.definition.expression.begin.typecek" }
       },
       "end": "~?\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.expression.end.typek" }
+        "0": { "name": "punctuation.definition.expression.end.typecek" }
       },
       "patterns": [
         { "include": "#expression-content" }
@@ -163,43 +163,43 @@
       "patterns": [
         {
           "match": "\"[^\"]*\"|'[^']*'",
-          "name": "string.quoted.typek"
+          "name": "string.quoted.typecek"
         },
         {
           "match": "\\b[0-9]+(\\.[0-9]+)?\\b",
-          "name": "constant.numeric.typek"
+          "name": "constant.numeric.typecek"
         },
         {
           "match": "@(index|first|last|length)\\b",
-          "name": "variable.language.meta.typek"
+          "name": "variable.language.meta.typecek"
         },
         {
           "match": "&&|\\|\\||!(?!=)",
-          "name": "keyword.operator.logical.typek"
+          "name": "keyword.operator.logical.typecek"
         },
         {
           "match": "==|!=|>=|<=|>|<",
-          "name": "keyword.operator.comparison.typek"
+          "name": "keyword.operator.comparison.typecek"
         },
         {
           "match": "[+\\-*/]",
-          "name": "keyword.operator.arithmetic.typek"
+          "name": "keyword.operator.arithmetic.typecek"
         },
         {
           "match": "\\.\\./",
-          "name": "keyword.operator.parent-scope.typek"
+          "name": "keyword.operator.parent-scope.typecek"
         },
         {
           "match": "(?<=\\.)[a-zA-Z_$][a-zA-Z0-9_$]*\\b",
-          "name": "variable.other.property.typek"
+          "name": "variable.other.property.typecek"
         },
         {
           "match": "\\.",
-          "name": "punctuation.accessor.typek"
+          "name": "punctuation.accessor.typecek"
         },
         {
           "match": "\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b",
-          "name": "variable.other.typek"
+          "name": "variable.other.typecek"
         }
       ]
     }

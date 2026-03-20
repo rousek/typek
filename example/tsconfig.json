@@ -8,9 +8,9 @@
     "outDir": "./out",
     "rootDir": ".",
     "paths": {
-      "@typek/runtime": ["../packages/runtime/src/index.ts"],
-      "@typek/render/*": ["./.typek/src/*"]
+      "@typecek/runtime": ["../packages/runtime/src/index.ts"],
+      "@typecek/render/*": ["./.typecek/src/*"]
     }
   },
-  "include": ["src/**/*.ts", ".typek/**/*.ts"]
+  "include": ["src/**/*.ts", ".typecek/**/*.ts"]
 }

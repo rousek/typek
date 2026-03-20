@@ -9,7 +9,7 @@
     "outDir": "./dist",
     "rootDirs": [
       "./src",
-      "./.typek"
+      "./.typecek"
     ]
   },
   "include": [

@@ -1,5 +1,5 @@
 {{#import CartPage from "../models/pages"}}
-{{#layout "../layouts/layout.html.tk" layout}}
+{{#layout "../layouts/layout.html.tc" layout}}
 <style>
   .total { font-size: 1.3em; font-weight: bold; text-align: right; padding: 20px 0; }
   .empty-cart { text-align: center; padding: 60px 20px; color: #888; }
@@ -69,5 +69,5 @@
 </div>
 {{/if}}
 
-{{> "../partials/comment-form.html.tk"}}
+{{> "../partials/comment-form.html.tc"}}
 {{/layout}}

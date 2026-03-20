@@ -1,5 +1,5 @@
 {{#import UserProfile from "../models/types"}}
-{{#layout "../layouts/layout.html.tk" layout}}
+{{#layout "../layouts/layout.html.tc" layout}}
 <style>
   .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
   .avatar { width: 80px; height: 80px; border-radius: 50%; background: #ddd; }
@@ -89,5 +89,5 @@
 {{/empty}}
 {{/for}}
 
-{{> "../partials/comment-form.html.tk"}}
+{{> "../partials/comment-form.html.tc"}}
 {{/layout}}

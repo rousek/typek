@@ -1,6 +1,6 @@
-# Getting Started with Typek
+# Getting Started with Typecek
 
-Typek is a typed templating language for TypeScript. Templates declare their data type upfront and the compiler validates every expression against it — catching typos, missing properties, and type mismatches at build time.
+Typecek is a typed templating language for TypeScript. Templates declare their data type upfront and the compiler validates every expression against it — catching typos, missing properties, and type mismatches at build time.
 
 ## Prerequisites
 
@@ -12,10 +12,10 @@ Typek is a typed templating language for TypeScript. Templates declare their dat
 <!-- TODO: Update once packages are published to npm -->
 
 ```bash
-npm install @typek/cli @typek/runtime
+npm install @typecek/cli @typecek/runtime
 ```
 
-> `@typek/cli` includes the compiler and core packages as dependencies, so you only need to install these two.
+> `@typecek/cli` includes the compiler and core packages as dependencies, so you only need to install these two. The CLI is also available as `typecku` for convenience.
 
 ## Project Setup
 
@@ -26,7 +26,7 @@ Start with a basic TypeScript project:
 ```bash
 mkdir my-app && cd my-app
 npm init -y
-npm install typescript @typek/cli @typek/runtime
+npm install typescript @typecek/cli @typecek/runtime
 npx tsc --init
 ```
 
@@ -45,21 +45,21 @@ Add a path alias so you can import the compiled render functions. Edit your `tsc
     "outDir": "./out",
     "rootDir": ".",
     "paths": {
-      "@typek/render/*": ["./.typek/src/*"]
+      "@typecek/render/*": ["./.typecek/src/*"]
     }
   },
-  "include": ["src/**/*.ts", ".typek/**/*.ts"]
+  "include": ["src/**/*.ts", ".typecek/**/*.ts"]
 }
 ```
 
-The key part is the `paths` mapping — it lets you import compiled templates with `@typek/render/...` instead of reaching into the `.typek` directory directly.
+The key part is the `paths` mapping — it lets you import compiled templates with `@typecek/render/...` instead of reaching into the `.typecek` directory directly.
 
-### 3. Add `.typek` to `.gitignore`
+### 3. Add `.typecek` to `.gitignore`
 
-The `.typek/` directory contains generated files and should not be committed:
+The `.typecek/` directory contains generated files and should not be committed:
 
 ```bash
-echo ".typek/" >> .gitignore
+echo ".typecek/" >> .gitignore
 ```
 
 ### 4. Add scripts to `package.json`
@@ -68,7 +68,7 @@ echo ".typek/" >> .gitignore
 {
   "type": "module",
   "scripts": {
-    "compile": "typek compile",
+    "compile": "typecek compile",
     "build": "npm run compile && npx tsx src/main.ts"
   }
 }
@@ -91,7 +91,7 @@ export interface Greeting {
 
 ### 2. Create a template
 
-Create `src/templates/hello.html.tk`:
+Create `src/templates/hello.html.tc`:
 
 ```
 {{#import Greeting from "../types"}}
@@ -100,15 +100,15 @@ Create `src/templates/hello.html.tk`:
 </h1>
 ```
 
-Every `.tk` template starts with `{{#import}}` — this tells the compiler what type the template expects. The compiler will check that `name` and `excited` actually exist on the `Greeting` interface.
+Every `.tc` template starts with `{{#import}}` — this tells the compiler what type the template expects. The compiler will check that `name` and `excited` actually exist on the `Greeting` interface.
 
 ### 3. Compile
 
 ```bash
-npx typek compile
+npx typecek compile
 ```
 
-This reads all `.tk` files, type-checks them against your TypeScript types, and generates render functions in the `.typek/` directory. You should see:
+This reads all `.tc` files, type-checks them against your TypeScript types, and generates render functions in the `.typecek/` directory. You should see:
 
 ```
 Compiled 1 template (0 errors)
@@ -117,7 +117,7 @@ Compiled 1 template (0 errors)
 If you misspell a property (e.g. `{{naem}}`), the compiler tells you:
 
 ```
-src/templates/hello.html.tk:3:10 - error: Property 'naem' does not exist on type Greeting
+src/templates/hello.html.tc:3:10 - error: Property 'naem' does not exist on type Greeting
 ```
 
 ### 4. Use the render function
@@ -125,7 +125,7 @@ src/templates/hello.html.tk:3:10 - error: Property 'naem' does not exist on type
 Create `src/main.ts`:
 
 ```typescript
-import render from "@typek/render/templates/hello.html";
+import render from "@typecek/render/templates/hello.html";
 
 const html = render({
   name: "World",
@@ -135,7 +135,7 @@ const html = render({
 console.log(html);
 ```
 
-The import path `@typek/render/templates/hello.html` maps to `.typek/src/templates/hello.html.ts` via the `paths` config in `tsconfig.json`. The render function is fully typed — TypeScript will error if you pass the wrong data shape.
+The import path `@typecek/render/templates/hello.html` maps to `.typecek/src/templates/hello.html.ts` via the `paths` config in `tsconfig.json`. The render function is fully typed — TypeScript will error if you pass the wrong data shape.
 
 ### 5. Run it
 
@@ -159,15 +159,15 @@ npm run build
 
 ## What just happened?
 
-1. You wrote a **type** (`Greeting`) and a **template** (`hello.html.tk`) that references it
-2. `typek compile` parsed the template, resolved the TypeScript type, validated all expressions, and generated a `render(data: Greeting): string` function
+1. You wrote a **type** (`Greeting`) and a **template** (`hello.html.tc`) that references it
+2. `typecek compile` parsed the template, resolved the TypeScript type, validated all expressions, and generated a `render(data: Greeting): string` function
 3. You imported that function and called it with data — getting type-safe HTML output
 
-The generated render function (in `.typek/src/templates/hello.html.ts`) looks roughly like:
+The generated render function (in `.typecek/src/templates/hello.html.ts`) looks roughly like:
 
 ```typescript
 import type { Greeting } from "../types";
-import { escapeHtml } from "@typek/runtime";
+import { escapeHtml } from "@typecek/runtime";
 
 export default function render(data: Greeting): string {
   let out = "";
@@ -181,7 +181,7 @@ export default function render(data: Greeting): string {
 }
 ```
 
-Since the template file ends in `.html.tk`, all `{{expressions}}` are HTML-escaped automatically. Use `{{{triple braces}}}` for raw output.
+Since the template file ends in `.html.tc`, all `{{expressions}}` are HTML-escaped automatically. Use `{{{triple braces}}}` for raw output.
 
 ## Next Steps
 
@@ -190,17 +190,17 @@ Since the template file ends in `.html.tk`, all `{{expressions}}` are HTML-escap
 - Use `{{#layout}}` and `{{@content}}` to wrap pages in reusable layouts
 - Use `{{> "path" data}}` to include partials
 - Use `{{#with obj}}` to scope into nested objects
-- Run `typek watch` during development for automatic recompilation
-- Run `typek check` to type-check without generating output
+- Run `typecek watch` during development for automatic recompilation
+- Run `typecek check` to type-check without generating output
 
 <!-- TODO: Add link to VS Code extension once published to the marketplace -->
 
 ### VS Code Extension
 
-Install the **Typek** extension for the best development experience:
+Install the **Typecek** extension for the best development experience:
 
 - Real-time type error diagnostics as you type
 - Hover over expressions to see their types
 - Ctrl+Click on properties to jump to their TypeScript definition
 - Autocomplete for properties, block tags, and import paths
-- Syntax highlighting for `.tk` files
+- Syntax highlighting for `.tc` files

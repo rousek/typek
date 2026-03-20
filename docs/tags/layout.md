@@ -25,7 +25,7 @@ Wraps the block's content in a layout template. The layout template receives the
 
 ### Layout template
 
-A layout template is a regular `.tk` file that contains exactly one `{{@content}}` tag:
+A layout template is a regular `.tc` file that contains exactly one `{{@content}}` tag:
 
 ```
 {{#import PageLayout from "./types"}}
@@ -43,7 +43,7 @@ A layout template is a regular `.tk` file that contains exactly one `{{@content}
 
 ```
 {{#import StorePage from "./types"}}
-{{#layout "../layouts/layout.html.tk" layout}}
+{{#layout "../layouts/layout.html.tc" layout}}
 <h2>Products</h2>
 {{#for product in products}}
   <div>{{product.name}}</div>
@@ -66,7 +66,7 @@ The compiler enforces:
 With data:
 
 ```
-{{#layout "./base.html.tk" layout}}
+{{#layout "./base.html.tc" layout}}
   <article>{{body}}</article>
 {{/layout}}
 ```
@@ -74,7 +74,7 @@ With data:
 Without data (layout has no dynamic content):
 
 ```
-{{#layout "./wrapper.html.tk"}}
+{{#layout "./wrapper.html.tc"}}
   <p>Simple wrapped content</p>
 {{/layout}}
 ```

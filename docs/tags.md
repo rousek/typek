@@ -1,12 +1,12 @@
 # Template Tags
 
-Every Typek template is built from tags enclosed in `{{ }}`. This page lists all available tags with links to detailed documentation.
+Every Typecek template is built from tags enclosed in `{{ }}`. This page lists all available tags with links to detailed documentation.
 
 ## Overview
 
 | Tag | Type | Closing tag | Description |
 |-----|------|-------------|-------------|
-| [`{{expr}}`](tags/expression.md) | Inline | — | Output an expression (HTML-escaped in `.html.tk`) |
+| [`{{expr}}`](tags/expression.md) | Inline | — | Output an expression (HTML-escaped in `.html.tc`) |
 | [`{{{expr}}}`](tags/raw-expression.md) | Inline | — | Output an expression without escaping |
 | [`{{#import}}`](tags/import.md) | Directive | — | Declare the template's data type |
 | [`{{#if}}`](tags/if.md) | Block | `{{/if}}` | Conditional rendering with optional `{{#else}}` / `{{#else if}}` |

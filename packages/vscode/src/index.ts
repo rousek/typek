@@ -12,16 +12,16 @@ import {
   formatType,
   TypeKind,
   type Type,
-} from "@typek/core";
+} from "@typecek/core";
 import fs from "fs";
 import path from "path";
 
-const TYPEK_LANGUAGES = ["typek", "typek-html", "typek-ts"];
+const TYPEK_LANGUAGES = ["typecek", "typecek-html", "typecek-ts"];
 const TYPEK_SELECTORS: vscode.DocumentSelector = TYPEK_LANGUAGES.map((lang) => ({ language: lang }));
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
-interface TypekConfig {
+interface TypecekConfig {
   typecheckEnabled: boolean;
   typecheckDebounce: number;
   snippetsEnabled: boolean;
@@ -30,8 +30,8 @@ interface TypekConfig {
   typeInfoHover: boolean;
 }
 
-function getConfig(): TypekConfig {
-  const cfg = vscode.workspace.getConfiguration("typek");
+function getConfig(): TypecekConfig {
+  const cfg = vscode.workspace.getConfiguration("typecek");
   return {
     typecheckEnabled: cfg.get<boolean>("typecheck.enabled", true),
     typecheckDebounce: cfg.get<number>("typecheck.debounce", 200),
@@ -43,7 +43,7 @@ function getConfig(): TypekConfig {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  diagnosticCollection = vscode.languages.createDiagnosticCollection("typek");
+  diagnosticCollection = vscode.languages.createDiagnosticCollection("typecek");
   context.subscriptions.push(diagnosticCollection);
 
   // Check active editor on activation
@@ -116,7 +116,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 }
 
-function isTypekDocument(document: vscode.TextDocument): boolean {
+function isTypecekDocument(document: vscode.TextDocument): boolean {
   return TYPEK_LANGUAGES.includes(document.languageId);
 }
 
@@ -172,7 +172,7 @@ const TAG_HELP: Record<string, { syntax: string; description: string }> = {
     description: "Scopes into a nested property. Inside the block, identifiers resolve against the expression's type. Use `../` to access the parent scope. Only renders if the value is truthy; use `{{#empty}}` for the fallback.",
   },
   "layout": {
-    syntax: '{{#layout "./layout.html.tk" data}}...{{/layout}}',
+    syntax: '{{#layout "./layout.html.tc" data}}...{{/layout}}',
     description: "Wraps content with a layout template. The layout template must contain `{{@content}}` to mark where the wrapped content is inserted. The second argument is the data passed to the layout's render function.",
   },
 };
@@ -192,7 +192,7 @@ function getTagHover(document: vscode.TextDocument, position: vscode.Position): 
       const help = TAG_HELP[tagName];
       if (!help) return undefined;
       const md = new vscode.MarkdownString();
-      md.appendCodeblock(help.syntax, "typek");
+      md.appendCodeblock(help.syntax, "typecek");
       md.appendMarkdown(help.description);
       const range = new vscode.Range(position.line, tagStart, position.line, tagEnd);
       return new vscode.Hover(md, range);
@@ -206,7 +206,7 @@ function getTagHover(document: vscode.TextDocument, position: vscode.Position): 
     const tildePos = match.index + tildeChar;
     if (col === tildePos) {
       const md = new vscode.MarkdownString();
-      md.appendCodeblock("{{~ expr}} or {{expr ~}}", "typek");
+      md.appendCodeblock("{{~ expr}} or {{expr ~}}", "typecek");
       md.appendMarkdown("The `~` strips whitespace on that side of the tag. Use on the left (`{{~`) to trim whitespace before, or on the right (`~}}`) to trim whitespace after.");
       const range = new vscode.Range(position.line, tildePos, position.line, tildePos + 1);
       return new vscode.Hover(md, range);
@@ -221,7 +221,7 @@ function getTagHover(document: vscode.TextDocument, position: vscode.Position): 
     const end = start + name.length;
     if (col >= start && col < end) {
       const md = new vscode.MarkdownString();
-      md.appendCodeblock(`{{${name}}}`, "typek");
+      md.appendCodeblock(`{{${name}}}`, "typecek");
       md.appendMarkdown({
         "@index": "Zero-based index of the current iteration.",
         "@first": "`true` on the first iteration.",
@@ -241,7 +241,7 @@ function getTagHover(document: vscode.TextDocument, position: vscode.Position): 
     const end = start + 3;
     if (col >= start && col < end) {
       const md = new vscode.MarkdownString();
-      md.appendCodeblock('{{> "./partial.html.tk" data}}', "typek");
+      md.appendCodeblock('{{> "./partial.html.tc" data}}', "typecek");
       md.appendMarkdown("Renders a partial template inline. The first argument is the path to the partial template, the second is the data passed to its render function.");
       const range = new vscode.Range(position.line, start, position.line, end);
       return new vscode.Hover(md, range);
@@ -252,7 +252,7 @@ function getTagHover(document: vscode.TextDocument, position: vscode.Position): 
 }
 
 function getHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
-  if (!isTypekDocument(document)) return undefined;
+  if (!isTypecekDocument(document)) return undefined;
   const config = getConfig();
 
   // Check tag help first (no parsing needed)
@@ -299,7 +299,7 @@ function getFilePathDefinition(document: vscode.TextDocument, position: vscode.P
         }
       }
 
-      // {{#layout "./path.tk" ...}} or {{> "./path.tk" ...}} — resolve as .tk file
+      // {{#layout "./path.tc" ...}} or {{> "./path.tc" ...}} — resolve as .tc file
       if (lineText.match(/\{\{#layout\s+/) || lineText.match(/\{\{>\s+/)) {
         const resolved = path.resolve(templateDir, filePath);
         if (fs.existsSync(resolved)) {
@@ -313,7 +313,7 @@ function getFilePathDefinition(document: vscode.TextDocument, position: vscode.P
 }
 
 function getDefinition(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
-  if (!isTypekDocument(document)) return undefined;
+  if (!isTypecekDocument(document)) return undefined;
 
   // Check for file path definitions first (import, layout, partial paths)
   const filePathDef = getFilePathDefinition(document, position);
@@ -341,7 +341,7 @@ function getDefinition(document: vscode.TextDocument, position: vscode.Position)
 }
 
 function getCompletions(document: vscode.TextDocument, position: vscode.Position): vscode.CompletionItem[] | undefined {
-  if (!isTypekDocument(document)) return undefined;
+  if (!isTypecekDocument(document)) return undefined;
 
   const lineText = document.lineAt(position.line).text;
   const textBefore = lineText.slice(0, position.character);
@@ -362,7 +362,7 @@ function getCompletions(document: vscode.TextDocument, position: vscode.Position
       { label: "with", snippet: "with ${1:expression}}}$0{{/with}}", doc: "Scopes into a nested property." },
       { label: "with...empty", snippet: "with ${1:expression}}}$0{{#empty}}{{/empty}}{{/with}}", doc: "Scope with empty fallback." },
       { label: "switch", snippet: "switch ${1:expression}}}{{#case \"${2:value}\"}}$0{{/case}}{{/switch}}", doc: "Matches expression against string cases." },
-      { label: "layout", snippet: "layout \"${1:./layout.html.tk}\" ${2:data}}}$0{{/layout}}", doc: "Wraps content with a layout template." },
+      { label: "layout", snippet: "layout \"${1:./layout.html.tc}\" ${2:data}}}$0{{/layout}}", doc: "Wraps content with a layout template." },
       { label: "import", snippet: "import ${1:Type} from \"${2:./types}\"}}", doc: "Import a TypeScript type for type checking." },
     ];
 
@@ -402,7 +402,7 @@ function getCompletions(document: vscode.TextDocument, position: vscode.Position
     const partialMatch = textBefore.match(/\{\{>\s*$/);
     if (partialMatch) {
       const item = new vscode.CompletionItem("partial", vscode.CompletionItemKind.Snippet);
-      item.insertText = new vscode.SnippetString(" \"${1:./partial.html.tk}\" ${2:data}}}");
+      item.insertText = new vscode.SnippetString(" \"${1:./partial.html.tc}\" ${2:data}}}");
       item.documentation = new vscode.MarkdownString("Renders a partial template inline.");
       return [item];
     }
@@ -536,7 +536,7 @@ function getPropertyCompletions(type: Type): vscode.CompletionItem[] {
 }
 
 function checkDocument(document: vscode.TextDocument): void {
-  if (!isTypekDocument(document)) return;
+  if (!isTypecekDocument(document)) return;
 
   if (!getConfig().typecheckEnabled) {
     diagnosticCollection.delete(document.uri);
@@ -573,7 +573,7 @@ function checkDocument(document: vscode.TextDocument): void {
           : vscode.DiagnosticSeverity.Warning;
 
         const vsDiag = new vscode.Diagnostic(range, diag.message, severity);
-        vsDiag.source = "typek";
+        vsDiag.source = "typecek";
         diagnostics.push(vsDiag);
       }
     } catch (err) {
@@ -581,7 +581,7 @@ function checkDocument(document: vscode.TextDocument): void {
       const message = err instanceof Error ? err.message : String(err);
       const range = new vscode.Range(0, 0, 0, template.indexOf("\n") || template.length);
       const vsDiag = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Error);
-      vsDiag.source = "typek";
+      vsDiag.source = "typecek";
       diagnostics.push(vsDiag);
     }
   } catch (err) {
@@ -591,7 +591,7 @@ function checkDocument(document: vscode.TextDocument): void {
       ? new vscode.Range(err.line, err.column, err.line, err.column + err.length)
       : new vscode.Range(0, 0, 0, template.indexOf("\n") || template.length);
     const vsDiag = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Error);
-    vsDiag.source = "typek";
+    vsDiag.source = "typecek";
     diagnostics.push(vsDiag);
   }
 

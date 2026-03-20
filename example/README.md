@@ -1,15 +1,15 @@
-# Typek Example
+# Typecek Example
 
-A sample e-commerce project demonstrating Typek's typed templating features.
+A sample e-commerce project demonstrating Typecek's typed templating features.
 
 ## Templates
 
 | File | Type | Description |
 |------|------|-------------|
-| `store.html.tk` | `StorePage` | Product listing with categories, featured product, loops, and conditionals |
-| `cart.html.tk` | `CartPage` | Shopping cart with user info, `{{#with}}` scoping, `{{#switch}}`, and `{{#empty}}` |
-| `profile.html.tk` | `UserProfile` | User profile with nested order list, status badges, and address display |
-| `email.html.tk` | `EmailData` | Marketing email template |
+| `store.html.tc` | `StorePage` | Product listing with categories, featured product, loops, and conditionals |
+| `cart.html.tc` | `CartPage` | Shopping cart with user info, `{{#with}}` scoping, `{{#switch}}`, and `{{#empty}}` |
+| `profile.html.tc` | `UserProfile` | User profile with nested order list, status badges, and address display |
+| `email.html.tc` | `EmailData` | Marketing email template |
 
 ## How to run
 
@@ -17,11 +17,11 @@ A sample e-commerce project demonstrating Typek's typed templating features.
 # Install dependencies
 pnpm install
 
-# Compile templates (.tk → .ts) and render with sample data
+# Compile templates (.tc → .ts) and render with sample data
 pnpm build
 
 # Or step by step:
-pnpm compile    # Compiles .tk templates into .typek/ directory
+pnpm compile    # Compiles .tc templates into .typecek/ directory
 pnpm render     # Runs render.ts which outputs HTML into dist/
 ```
 
@@ -29,10 +29,10 @@ Open the files in `dist/` in your browser to see the results.
 
 ## What's happening
 
-1. **`pnpm compile`** runs the Typek CLI which:
-   - Finds all `.tk` files in `src/`
+1. **`pnpm compile`** runs the Typecek CLI which:
+   - Finds all `.tc` files in `src/`
    - Type-checks each template against its declared TypeScript type
-   - Generates `.ts` render functions in `.typek/`
+   - Generates `.ts` render functions in `.typecek/`
 
 2. **`pnpm render`** runs `src/render.ts` which:
    - Imports the compiled render functions
@@ -47,10 +47,10 @@ example/
     types.ts          TypeScript interfaces (Product, User, Order, etc.)
     data.ts           Sample data matching those types
     render.ts         Script that calls render functions and writes HTML
-    store.html.tk     Product listing page template
-    cart.html.tk      Shopping cart page template
-    profile.html.tk   User profile page template
-    email.html.tk     Email template
+    store.html.tc     Product listing page template
+    cart.html.tc      Shopping cart page template
+    profile.html.tc   User profile page template
+    email.html.tc     Email template
   dist/               Generated HTML files (after running pnpm build)
-  .typek/             Generated TypeScript render functions (after compile)
+  .typecek/             Generated TypeScript render functions (after compile)
 ```

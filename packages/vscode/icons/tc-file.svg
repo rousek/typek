@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 230" width="200" height="230">
+  <!-- Full diamond (lighter blue) -->
+  <polygon points="100,0 200,115 100,230 0,115" fill="rgb(64,134,200)"/>
+  <!-- Right half (darker blue, overlaid) -->
+  <polygon points="100,0 200,115 100,230" fill="rgb(49,112,172)"/>
+  <text x="100" y="148" text-anchor="middle" font-family="Verdana, sans-serif" font-weight="600" font-size="88" fill="white" letter-spacing="-1">TC</text>
+</svg>

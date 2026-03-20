@@ -1,20 +1,20 @@
 {
-  "name": "@typek/cli",
+  "name": "@typecek/cli",
   "version": "0.0.1",
-  "description": "CLI for Typek (typek / typku commands)",
+  "description": "CLI for Typecek",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "typek": "dist/bin.js",
-    "typku": "dist/bin.js"
+    "typecek": "dist/bin.js",
+    "typecku": "dist/bin.js"
   },
   "scripts": {
     "build": "tsc -b",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
-    "@typek/core": "workspace:*",
-    "@typek/compiler": "workspace:*"
+    "@typecek/core": "workspace:*",
+    "@typecek/compiler": "workspace:*"
   },
   "files": ["dist"],
   "license": "UNLICENSED"

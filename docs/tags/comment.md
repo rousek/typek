@@ -29,4 +29,4 @@ A comment that is not included in the rendered output.
 
 - Comments are completely stripped from the output
 - When a comment is on its own line, the surrounding whitespace and newline are also stripped (standalone line stripping)
-- Unlike HTML comments (`<!-- -->`), Typek comments are never sent to the browser
+- Unlike HTML comments (`<!-- -->`), Typecek comments are never sent to the browser

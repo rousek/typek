@@ -79,7 +79,7 @@ type TemplateResolution = {
 };
 
 function resolveTemplateType(templateDir: string, refPath: string): TemplateResolution {
-  const fullPath = path.resolve(templateDir, refPath.endsWith(".tk") ? refPath : refPath + ".tk");
+  const fullPath = path.resolve(templateDir, refPath.endsWith(".tc") ? refPath : refPath + ".tc");
   let template: string;
   try {
     template = fs.readFileSync(fullPath, "utf-8");

@@ -1,5 +1,5 @@
 {{#import ContactsPage from "../models/types"}}
-{{#layout "../layouts/layout.html.tk" layout}}
+{{#layout "../layouts/layout.html.tc" layout}}
 <style>
   .contacts { display: grid; gap: 16px; }
   .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
@@ -29,5 +29,5 @@
   {{/for}}
 </div>
 
-{{> "../partials/comment-form.html.tk"}}
+{{> "../partials/comment-form.html.tc"}}
 {{/layout}}

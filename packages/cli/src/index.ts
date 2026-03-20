@@ -32,7 +32,7 @@ export function main(args: string[]): void {
       help();
       break;
     default:
-      console.error(`typek: unknown command "${command}". Run "typek help" for usage.`);
+      console.error(`typecek: unknown command "${command}". Run "typecek help" for usage.`);
       process.exitCode = 1;
   }
 }

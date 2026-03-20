@@ -20,10 +20,10 @@ importers:
 
   example:
     dependencies:
-      '@typek/cli':
+      '@typecek/cli':
         specifier: workspace:*
         version: link:../packages/cli
-      '@typek/runtime':
+      '@typecek/runtime':
         specifier: workspace:*
         version: link:../packages/runtime
     devDependencies:
@@ -33,19 +33,19 @@ importers:
 
   packages/cli:
     dependencies:
-      '@typek/compiler':
+      '@typecek/compiler':
         specifier: workspace:*
         version: link:../compiler
-      '@typek/core':
+      '@typecek/core':
         specifier: workspace:*
         version: link:../core
 
   packages/compiler:
     dependencies:
-      '@typek/core':
+      '@typecek/core':
         specifier: workspace:*
         version: link:../core
-      '@typek/runtime':
+      '@typecek/runtime':
         specifier: workspace:*
         version: link:../runtime
 
@@ -59,9 +59,12 @@ importers:
 
   packages/vscode:
     dependencies:
-      '@typek/core':
+      '@typecek/core':
         specifier: workspace:*
         version: link:../core
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
     devDependencies:
       '@types/vscode':
         specifier: ^1.110.0

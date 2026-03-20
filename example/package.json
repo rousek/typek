@@ -1,16 +1,16 @@
 {
-  "name": "typek-example",
+  "name": "typecek-example",
   "private": true,
   "type": "module",
   "scripts": {
-    "compile": "typku compile",
+    "compile": "typecek compile",
     "render": "tsx src/render.ts",
     "build": "pnpm compile && pnpm render",
-    "clean": "typku clean && rm -rf dist out"
+    "clean": "typecek clean && rm -rf dist out"
   },
   "dependencies": {
-    "@typek/cli": "workspace:*",
-    "@typek/runtime": "workspace:*"
+    "@typecek/cli": "workspace:*",
+    "@typecek/runtime": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.0"

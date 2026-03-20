@@ -1,0 +1,32 @@
+{
+  "scopeName": "text.html.typecek",
+  "name": "Typecek HTML",
+  "patterns": [
+    { "include": "#raw-block-html" },
+    { "include": "text.typecek#type-directive" },
+    { "include": "text.typecek#comment" },
+    { "include": "text.typecek#raw-expression" },
+    { "include": "text.typecek#block-close" },
+    { "include": "text.typecek#block-open" },
+    { "include": "text.typecek#partial" },
+    { "include": "text.typecek#escaped-braces" },
+    { "include": "text.typecek#expression" },
+    { "include": "text.html.basic" }
+  ],
+  "repository": {
+    "raw-block-html": {
+      "name": "meta.raw-block.typecek",
+      "begin": "\\{\\{#raw\\}\\}",
+      "beginCaptures": {
+        "0": { "name": "keyword.control.raw.typecek" }
+      },
+      "end": "\\{\\{/raw\\}\\}",
+      "endCaptures": {
+        "0": { "name": "keyword.control.raw.typecek" }
+      },
+      "patterns": [
+        { "include": "text.html.basic" }
+      ]
+    }
+  }
+}

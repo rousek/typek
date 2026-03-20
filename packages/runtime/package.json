@@ -1,7 +1,7 @@
 {
-  "name": "@typek/runtime",
+  "name": "@typecek/runtime",
   "version": "0.0.1",
-  "description": "Minimal runtime helpers for Typek (escaping, iteration)",
+  "description": "Minimal runtime helpers for Typecek (escaping, iteration)",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

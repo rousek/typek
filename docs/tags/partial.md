@@ -1,6 +1,6 @@
 # `{{> partial}}`
 
-Renders another template inline, passing data to it. The partial is a regular `.tk` file with its own `{{#import}}` directive.
+Renders another template inline, passing data to it. The partial is a regular `.tc` file with its own `{{#import}}` directive.
 
 ## Syntax
 
@@ -33,11 +33,11 @@ Render a product card:
 
 ```
 {{#for product in products}}
-  {{> "../partials/product-card.html.tk" product}}
+  {{> "../partials/product-card.html.tc" product}}
 {{/for}}
 ```
 
-Where `product-card.html.tk` is:
+Where `product-card.html.tc` is:
 
 ```
 {{#import Product from "../models/types"}}
@@ -50,5 +50,5 @@ Where `product-card.html.tk` is:
 Without data:
 
 ```
-{{> "./footer.html.tk"}}
+{{> "./footer.html.tc"}}
 ```

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { compile } from "@typek/compiler";
-import type { Diagnostic } from "@typek/core";
+import { compile } from "@typecek/compiler";
+import type { Diagnostic } from "@typecek/core";
 
 // ANSI color helpers
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
@@ -49,9 +49,9 @@ function findTemplateFiles(dir: string): string[] {
     for (const entry of entries) {
       const fullPath = path.join(currentDir, entry.name);
       if (entry.isDirectory()) {
-        if (entry.name === "node_modules" || entry.name === ".typek" || entry.name.startsWith(".")) continue;
+        if (entry.name === "node_modules" || entry.name === ".typecek" || entry.name.startsWith(".")) continue;
         walk(fullPath);
-      } else if (entry.name.endsWith(".tk")) {
+      } else if (entry.name.endsWith(".tc")) {
         results.push(fullPath);
       }
     }
@@ -105,11 +105,11 @@ function formatSimpleError(
 export function compileAll(checkOnly = false): void {
   const projectRoot = findTsconfigRoot();
   const sourceRoot = findSourceRoot(projectRoot);
-  const typekDir = path.join(projectRoot, ".typek");
+  const typecekDir = path.join(projectRoot, ".typecek");
   const templateFiles = findTemplateFiles(sourceRoot);
 
   if (templateFiles.length === 0) {
-    console.log("No .tk template files found.");
+    console.log("No .tc template files found.");
     return;
   }
 
@@ -120,8 +120,8 @@ export function compileAll(checkOnly = false): void {
 
   for (const templatePath of templateFiles) {
     const relativePath = path.relative(sourceRoot, templatePath);
-    const outputRelative = relativePath.replace(/\.tk$/, ".ts");
-    const outputPath = path.join(typekDir, outputRelative);
+    const outputRelative = relativePath.replace(/\.tc$/, ".ts");
+    const outputPath = path.join(typecekDir, outputRelative);
 
     try {
       const template = fs.readFileSync(templatePath, "utf-8");
@@ -174,7 +174,7 @@ export function compileAll(checkOnly = false): void {
   for (const [filePath, info] of compiledTemplates) {
     // Check that {{#layout}} references point to templates with {{@content}}
     for (const dep of info.layoutDeps) {
-      const resolvedDep = path.resolve(path.dirname(filePath), dep + ".tk");
+      const resolvedDep = path.resolve(path.dirname(filePath), dep + ".tc");
       const depInfo = compiledTemplates.get(resolvedDep);
       if (depInfo && !depInfo.isLayout) {
         errors++;

@@ -4,12 +4,12 @@ import { findTsconfigRoot } from "./compile.js";
 
 export function clean(): void {
   const projectRoot = findTsconfigRoot();
-  const typekDir = path.join(projectRoot, ".typek");
+  const typecekDir = path.join(projectRoot, ".typecek");
 
-  if (fs.existsSync(typekDir)) {
-    fs.rmSync(typekDir, { recursive: true, force: true });
-    console.log("Removed .typek/ directory.");
+  if (fs.existsSync(typecekDir)) {
+    fs.rmSync(typecekDir, { recursive: true, force: true });
+    console.log("Removed .typecek/ directory.");
   } else {
-    console.log("Nothing to clean — .typek/ does not exist.");
+    console.log("Nothing to clean — .typecek/ does not exist.");
   }
 }

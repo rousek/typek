@@ -44,7 +44,7 @@ A value is **falsy** if it is `false`, `0`, `""`, `null`, or `undefined`. Everyt
 
 ## Union type narrowing
 
-When the condition checks for a property that exists on some members of a union type but not others, Typek automatically narrows the type inside the block.
+When the condition checks for a property that exists on some members of a union type but not others, Typecek automatically narrows the type inside the block.
 
 Given:
 

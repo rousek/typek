@@ -6,7 +6,7 @@ describe("compiler", () => {
     it("compiles to a module with a render function export", () => {
       const result = compile({
         template: '{{#import User from "./types"}}\n<h1>{{name}}</h1>',
-        filename: "greeting.html.tk",
+        filename: "greeting.html.tc",
       });
       expect(result.code).toContain("export default function render");
       expect(result.code).toContain('import type { User } from');
@@ -15,7 +15,7 @@ describe("compiler", () => {
     it("render function accepts typed data parameter", () => {
       const result = compile({
         template: '{{#import User from "./types"}}\n{{name}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toMatch(/function render\(data: User\): string/);
     });
@@ -23,7 +23,7 @@ describe("compiler", () => {
     it("returns string from render function", () => {
       const result = compile({
         template: '{{#import User from "./types"}}\n{{name}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toMatch(/: string/);
     });
@@ -33,7 +33,7 @@ describe("compiler", () => {
     it("compiles plain text to string literal", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\nhello world',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("hello world");
     });
@@ -41,7 +41,7 @@ describe("compiler", () => {
     it("strips the type directive from output", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\ncontent',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).not.toMatch(/\{\{#import/);
     });
@@ -51,7 +51,7 @@ describe("compiler", () => {
     it("compiles property access expression", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{user.name}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("data.user.name");
     });
@@ -59,25 +59,25 @@ describe("compiler", () => {
     it("compiles arithmetic expression", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{price * qty}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("data.price * data.qty");
     });
   });
 
   describe("escaping strategy", () => {
-    it("applies HTML escaping for .html.tk files", () => {
+    it("applies HTML escaping for .html.tc files", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{content}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("escapeHtml");
     });
 
-    it("applies no escaping for .ts.tk files", () => {
+    it("applies no escaping for .ts.tc files", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{content}}',
-        filename: "test.ts.tk",
+        filename: "test.ts.tc",
       });
       expect(result.code).not.toContain("escapeHtml");
     });
@@ -85,7 +85,7 @@ describe("compiler", () => {
     it("skips escaping for raw triple-brace expressions in HTML", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{{content}}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       // raw expression should not go through escapeHtml
       expect(result.code).toContain("data.content");
@@ -97,7 +97,7 @@ describe("compiler", () => {
     it("compiles if block to conditional", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{#if active}}yes{{/if}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("data.active");
       expect(result.code).toContain("yes");
@@ -106,7 +106,7 @@ describe("compiler", () => {
     it("compiles if/else to conditional with both branches", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{#if active}}yes{{#else}}no{{/if}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("yes");
       expect(result.code).toContain("no");
@@ -115,7 +115,7 @@ describe("compiler", () => {
     it("compiles for..in to iteration", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{#for item in items}}{{item.name}}{{/for}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("data.items");
     });
@@ -123,7 +123,7 @@ describe("compiler", () => {
     it("compiles for..in with empty block", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{#for item in items}}{{item.name}}{{#empty}}none{{/empty}}{{/for}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("none");
       expect(result.code).toContain("length");
@@ -132,7 +132,7 @@ describe("compiler", () => {
     it("compiles switch-case", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{#switch role}}{{#case "admin"}}Admin{{/case}}{{#default}}Guest{{/default}}{{/switch}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("data.role");
       expect(result.code).toContain("admin");
@@ -145,7 +145,7 @@ describe("compiler", () => {
     it("compiles @index to loop index", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{#for item in items}}{{@index}}{{/for}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       // should reference the loop counter variable
       expect(result.code).toMatch(/__i_\d/);
@@ -156,7 +156,7 @@ describe("compiler", () => {
     it("compiles escaped braces to literal text", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n\\{{ angular \\}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("{{ angular }}");
     });
@@ -164,7 +164,7 @@ describe("compiler", () => {
     it("compiles raw block to literal text", () => {
       const result = compile({
         template: '{{#import T from "./t"}}\n{{#raw}}{{ anything }}{{/raw}}',
-        filename: "test.html.tk",
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("{{ anything }}");
     });
@@ -173,8 +173,8 @@ describe("compiler", () => {
   describe("partials", () => {
     it("compiles partial invocation to function call", () => {
       const result = compile({
-        template: '{{#import T from "./t"}}\n{{> "./header.html.tk" page}}',
-        filename: "test.html.tk",
+        template: '{{#import T from "./t"}}\n{{> "./header.html.tc" page}}',
+        filename: "test.html.tc",
       });
       expect(result.code).toContain("__partial_0");
       expect(result.code).toContain("import __partial_0");

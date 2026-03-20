@@ -10,7 +10,7 @@ export function list(): void {
   const templateFiles = findTemplateFilesRecursive(sourceRoot);
 
   if (templateFiles.length === 0) {
-    console.log("No .tk template files found.");
+    console.log("No .tc template files found.");
     return;
   }
 
@@ -49,7 +49,7 @@ function findTemplateFilesRecursive(dir: string): string[] {
       if (entry.isDirectory()) {
         if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
         walk(fullPath);
-      } else if (entry.name.endsWith(".tk")) {
+      } else if (entry.name.endsWith(".tc")) {
         results.push(fullPath);
       }
     }

@@ -1,6 +1,6 @@
 # `{{expression}}`
 
-Outputs the value of an expression. In `.html.tk` files, the output is automatically HTML-escaped.
+Outputs the value of an expression. In `.html.tc` files, the output is automatically HTML-escaped.
 
 ## Syntax
 
@@ -16,7 +16,7 @@ Outputs the value of an expression. In `.html.tk` files, the output is automatic
 
 ## Expressions
 
-Typek supports the following expression types:
+Typecek supports the following expression types:
 
 | Expression | Example | Description |
 |------------|---------|-------------|
@@ -33,7 +33,7 @@ All expressions are type-checked against the imported type at compile time.
 
 ## HTML escaping
 
-In `.html.tk` files, the following characters are escaped:
+In `.html.tc` files, the following characters are escaped:
 
 | Character | Escaped as |
 |-----------|------------|
@@ -43,9 +43,9 @@ In `.html.tk` files, the following characters are escaped:
 | `"` | `&quot;` |
 | `'` | `&#x27;` |
 
-In plain `.tk` files, no escaping is applied.
+In plain `.tc` files, no escaping is applied.
 
-To output without escaping in `.html.tk` files, use [`{{{triple braces}}}`](raw-expression.md).
+To output without escaping in `.html.tc` files, use [`{{{triple braces}}}`](raw-expression.md).
 
 ## Examples
 

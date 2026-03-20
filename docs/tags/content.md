@@ -20,7 +20,7 @@ None.
 
 ## Example
 
-Layout template (`layout.html.tk`):
+Layout template (`layout.html.tc`):
 
 ```
 {{#import PageLayout from "./types"}}
@@ -37,7 +37,7 @@ Page template:
 
 ```
 {{#import Page from "./types"}}
-{{#layout "./layout.html.tk" layout}}
+{{#layout "./layout.html.tc" layout}}
   <h1>Hello!</h1>
 {{/layout}}
 ```

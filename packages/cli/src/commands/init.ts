@@ -19,8 +19,8 @@ export function init(): void {
 
   let tsconfigChanged = false;
 
-  if (!rootDirs.includes("./.typek")) {
-    rootDirs.push("./.typek");
+  if (!rootDirs.includes("./.typecek")) {
+    rootDirs.push("./.typecek");
     compilerOptions.rootDirs = rootDirs;
     tsconfig.compilerOptions = compilerOptions;
     tsconfigChanged = true;
@@ -43,22 +43,22 @@ export function init(): void {
   // Update .gitignore
   if (fs.existsSync(gitignorePath)) {
     const content = fs.readFileSync(gitignorePath, "utf-8");
-    if (!content.includes(".typek")) {
-      fs.appendFileSync(gitignorePath, "\n# Typek compiled output\n.typek/\n");
-      console.log("Added .typek/ to .gitignore.");
+    if (!content.includes(".typecek")) {
+      fs.appendFileSync(gitignorePath, "\n# Typecek compiled output\n.typecek/\n");
+      console.log("Added .typecek/ to .gitignore.");
     } else {
-      console.log(".gitignore already includes .typek/.");
+      console.log(".gitignore already includes .typecek/.");
     }
   } else {
-    fs.writeFileSync(gitignorePath, "# Typek compiled output\n.typek/\n");
-    console.log("Created .gitignore with .typek/.");
+    fs.writeFileSync(gitignorePath, "# Typecek compiled output\n.typecek/\n");
+    console.log("Created .gitignore with .typecek/.");
   }
 
-  // Create .typek directory
-  const typekDir = path.join(cwd, ".typek");
-  if (!fs.existsSync(typekDir)) {
-    fs.mkdirSync(typekDir, { recursive: true });
+  // Create .typecek directory
+  const typecekDir = path.join(cwd, ".typecek");
+  if (!fs.existsSync(typecekDir)) {
+    fs.mkdirSync(typecekDir, { recursive: true });
   }
 
-  console.log("Typek initialized.");
+  console.log("Typecek initialized.");
 }

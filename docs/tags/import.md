@@ -25,7 +25,7 @@ Declares the TypeScript type that the template expects as its data. Must be the 
 
 ## How it works
 
-The import directive tells the Typek compiler:
+The import directive tells the Typecek compiler:
 
 1. **Where to find the type** — the path is resolved relative to the template file
 2. **What type to validate against** — every `{{expression}}` in the template is checked against this type

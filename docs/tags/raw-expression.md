@@ -37,4 +37,4 @@ With double braces, `<p>Hello</p>` would render as the literal text `&lt;p&gt;He
 
 ## Note
 
-In plain `.tk` files (not `.html.tk`), no escaping is applied regardless of brace count, so `{{expr}}` and `{{{expr}}}` behave identically.
+In plain `.tc` files (not `.html.tc`), no escaping is applied regardless of brace count, so `{{expr}}` and `{{{expr}}}` behave identically.

@@ -7,9 +7,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@typek/core": path.resolve(__dirname, "packages/core/src/index.ts"),
-      "@typek/runtime": path.resolve(__dirname, "packages/runtime/src/index.ts"),
-      "@typek/compiler": path.resolve(__dirname, "packages/compiler/src/index.ts"),
+      "@typecek/core": path.resolve(__dirname, "packages/core/src/index.ts"),
+      "@typecek/runtime": path.resolve(__dirname, "packages/runtime/src/index.ts"),
+      "@typecek/compiler": path.resolve(__dirname, "packages/compiler/src/index.ts"),
     },
   },
 });

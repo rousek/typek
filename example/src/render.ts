@@ -2,11 +2,11 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import renderCart from "@typek/render/templates/cart.html";
-import renderContacts from "@typek/render/templates/contacts.html";
-import renderEmail from "@typek/render/templates/email.html";
-import renderProfile from "@typek/render/templates/profile.html";
-import renderStore from "@typek/render/templates/store.html";
+import renderCart from "@typecek/render/templates/cart.html";
+import renderContacts from "@typecek/render/templates/contacts.html";
+import renderEmail from "@typecek/render/templates/email.html";
+import renderProfile from "@typecek/render/templates/profile.html";
+import renderStore from "@typecek/render/templates/store.html";
 
 import { storeData } from "./data/store.js";
 import { cartData } from "./data/cart.js";

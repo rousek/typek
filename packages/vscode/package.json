@@ -1,9 +1,9 @@
 {
-  "name": "typek-vscode",
-  "displayName": "Typek",
-  "description": "Syntax highlighting and type checking for Typek typed templates (.tk files)",
+  "name": "typecek-vscode",
+  "displayName": "Typecek",
+  "description": "Syntax highlighting and type checking for Typecek typed templates (.tc files)",
   "version": "0.0.1",
-  "publisher": "typek",
+  "publisher": "typecek",
   "engines": {
     "vscode": "^1.110.0"
   },
@@ -15,69 +15,81 @@
   "contributes": {
     "languages": [
       {
-        "id": "typek-html",
+        "id": "typecek-html",
         "aliases": [
-          "Typek HTML",
-          "tk-html"
+          "Typecek HTML",
+          "tc-html"
         ],
         "extensions": [
-          ".html.tk"
+          ".html.tc"
         ],
+        "icon": {
+          "light": "./icons/tc-file.svg",
+          "dark": "./icons/tc-file.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
-        "id": "typek-ts",
+        "id": "typecek-ts",
         "aliases": [
-          "Typek TypeScript",
-          "tk-ts"
+          "Typecek TypeScript",
+          "tc-ts"
         ],
         "extensions": [
-          ".ts.tk"
+          ".ts.tc"
         ],
+        "icon": {
+          "light": "./icons/tc-file.svg",
+          "dark": "./icons/tc-file.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
-        "id": "typek",
+        "id": "typecek",
         "aliases": [
-          "Typek"
+          "Typecek"
         ],
         "extensions": [
-          ".tk"
+          ".tc"
         ],
+        "icon": {
+          "light": "./icons/tc-file.svg",
+          "dark": "./icons/tc-file.svg"
+        },
         "configuration": "./language-configuration.json"
       }
     ],
     "configuration": {
-      "title": "Typek",
+      "title": "Typecek",
       "properties": {
-        "typek.typecheck.enabled": {
+        "typecek.typecheck.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Enable real-time type checking of templates."
         },
-        "typek.typecheck.debounce": {
+        "typecek.typecheck.debounce": {
           "type": "number",
           "default": 200,
           "minimum": 0,
           "maximum": 5000,
           "description": "Delay in milliseconds before re-checking a template after editing."
         },
-        "typek.completions.snippets": {
+        "typecek.completions.snippets": {
           "type": "boolean",
           "default": false,
           "description": "Show snippet completions for block tags (e.g. {{#if ...}}...{{/if}})."
         },
-        "typek.completions.properties": {
+        "typecek.completions.properties": {
           "type": "boolean",
           "default": true,
           "description": "Show property completions based on the imported type."
         },
-        "typek.hover.tagHelp": {
+        "typecek.hover.tagHelp": {
           "type": "boolean",
           "default": true,
           "description": "Show syntax help when hovering over template tags."
         },
-        "typek.hover.typeInfo": {
+        "typecek.hover.typeInfo": {
           "type": "boolean",
           "default": true,
           "description": "Show type information when hovering over expressions."
@@ -86,25 +98,25 @@
     },
     "grammars": [
       {
-        "language": "typek-html",
-        "scopeName": "text.html.typek",
-        "path": "./syntaxes/typek-html.tmLanguage.json",
+        "language": "typecek-html",
+        "scopeName": "text.html.typecek",
+        "path": "./syntaxes/typecek-html.tmLanguage.json",
         "embeddedLanguages": {
           "text.html.basic": "html"
         }
       },
       {
-        "language": "typek-ts",
-        "scopeName": "source.ts.typek",
-        "path": "./syntaxes/typek-ts.tmLanguage.json",
+        "language": "typecek-ts",
+        "scopeName": "source.ts.typecek",
+        "path": "./syntaxes/typecek-ts.tmLanguage.json",
         "embeddedLanguages": {
           "source.ts": "typescript"
         }
       },
       {
-        "language": "typek",
-        "scopeName": "text.typek",
-        "path": "./syntaxes/typek.tmLanguage.json"
+        "language": "typecek",
+        "scopeName": "text.typecek",
+        "path": "./syntaxes/typecek.tmLanguage.json"
       }
     ]
   },
@@ -113,10 +125,10 @@
     "build:tsc": "tsc -b",
     "clean": "rm -rf dist *.tsbuildinfo",
     "package": "pnpm build && vsce package",
-    "install-ext": "pnpm build && vsce package --no-dependencies && code --install-extension typek-vscode-0.0.1.vsix --force"
+    "install-ext": "pnpm build && vsce package --no-dependencies && code --install-extension typecek-vscode-0.0.1.vsix --force"
   },
   "dependencies": {
-    "@typek/core": "workspace:*",
+    "@typecek/core": "workspace:*",
     "typescript": "^5.7.0"
   },
   "devDependencies": {
@@ -127,6 +139,7 @@
   "files": [
     "dist",
     "syntaxes",
+    "icons",
     "language-configuration.json"
   ],
   "license": "UNLICENSED"

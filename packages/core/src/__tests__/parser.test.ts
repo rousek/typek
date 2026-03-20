@@ -274,17 +274,17 @@ describe("parser", () => {
 
   describe("partials", () => {
     it("parses partial without data", () => {
-      const ast = parse('{{#import T from "./t"}}\n{{> "./header.html.tk"}}');
+      const ast = parse('{{#import T from "./t"}}\n{{> "./header.html.tc"}}');
       const partial = ast.body.find((n) => n.type === NodeType.Partial);
       expect(partial).toBeDefined();
-      expect(partial!.path).toBe("./header.html.tk");
+      expect(partial!.path).toBe("./header.html.tc");
       expect(partial!.dataExpr).toBeNull();
     });
 
     it("parses partial with data expression", () => {
-      const ast = parse('{{#import T from "./t"}}\n{{> "./header.html.tk" page}}');
+      const ast = parse('{{#import T from "./t"}}\n{{> "./header.html.tc" page}}');
       const partial = ast.body.find((n) => n.type === NodeType.Partial);
-      expect(partial!.path).toBe("./header.html.tk");
+      expect(partial!.path).toBe("./header.html.tc");
       expect(partial!.dataExpr).toBeDefined();
     });
   });

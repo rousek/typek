@@ -1,0 +1,32 @@
+{
+  "scopeName": "source.ts.typecek",
+  "name": "Typecek TypeScript",
+  "patterns": [
+    { "include": "#raw-block-ts" },
+    { "include": "text.typecek#type-directive" },
+    { "include": "text.typecek#comment" },
+    { "include": "text.typecek#raw-expression" },
+    { "include": "text.typecek#block-close" },
+    { "include": "text.typecek#block-open" },
+    { "include": "text.typecek#partial" },
+    { "include": "text.typecek#escaped-braces" },
+    { "include": "text.typecek#expression" },
+    { "include": "source.ts" }
+  ],
+  "repository": {
+    "raw-block-ts": {
+      "name": "meta.raw-block.typecek",
+      "begin": "\\{\\{#raw\\}\\}",
+      "beginCaptures": {
+        "0": { "name": "keyword.control.raw.typecek" }
+      },
+      "end": "\\{\\{/raw\\}\\}",
+      "endCaptures": {
+        "0": { "name": "keyword.control.raw.typecek" }
+      },
+      "patterns": [
+        { "include": "source.ts" }
+      ]
+    }
+  }
+}
