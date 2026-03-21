@@ -1,7 +1,7 @@
 {
   "name": "typecek",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Typecek — typed templating library",
   "scripts": {
     "build": "pnpm -r run build",
