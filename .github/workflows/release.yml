@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          registry-url: https://registry.npmjs.org
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
@@ -34,10 +35,10 @@ jobs:
 
       - name: Publish to npm
         run: |
-          cd packages/runtime && npm publish --access public --provenance
-          cd ../core && npm publish --access public --provenance
-          cd ../compiler && npm publish --access public --provenance
-          cd ../cli && npm publish --access public --provenance
+          pnpm --filter @typecek/runtime publish --access public --no-git-checks --provenance
+          pnpm --filter @typecek/core publish --access public --no-git-checks --provenance
+          pnpm --filter @typecek/compiler publish --access public --no-git-checks --provenance
+          pnpm --filter @typecek/cli publish --access public --no-git-checks --provenance
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
