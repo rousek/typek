@@ -23,9 +23,7 @@ npm install @typecek/cli @typecek/runtime
 
 ## Project Setup
 
-### 1. Initialize your project
-
-Start with a basic TypeScript project:
+### 1. Create your project
 
 ```bash
 mkdir my-app && cd my-app
@@ -36,37 +34,18 @@ npx tsc --init
 
 ### 2. Configure TypeScript
 
-Add a path alias so you can import the compiled render functions. Edit your `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "outDir": "./out",
-    "rootDir": ".",
-    "paths": {
-      "@typecek/render/*": ["./.typecek/src/*"]
-    }
-  },
-  "include": ["src/**/*.ts", ".typecek/**/*.ts"]
-}
-```
-
-The key part is the `paths` mapping — it lets you import compiled templates with `@typecek/render/...` instead of reaching into the `.typecek` directory directly.
-
-### 3. Add `.typecek` to `.gitignore`
-
-The `.typecek/` directory contains generated files and should not be committed:
+Run the init command to set up your `tsconfig.json` and `.gitignore`:
 
 ```bash
-echo ".typecek/" >> .gitignore
+npx typecek init
 ```
 
-### 4. Add scripts to `package.json`
+This does three things:
+- Adds `rootDirs` to `tsconfig.json` so TypeScript can resolve compiled templates
+- Adds `.typecek/**/*.ts` to `include`
+- Adds `.typecek/` to `.gitignore`
+
+### 3. Add scripts to `package.json`
 
 ```json
 {
@@ -129,7 +108,7 @@ src/templates/hello.html.tc:3:10 - error: Property 'naem' does not exist on type
 Create `src/main.ts`:
 
 ```typescript
-import render from "@typecek/render/templates/hello.html";
+import render from "./templates/hello.html";
 
 const html = render({
   name: "World",
@@ -139,7 +118,9 @@ const html = render({
 console.log(html);
 ```
 
-The import path `@typecek/render/templates/hello.html` maps to `.typecek/src/templates/hello.html.ts` via the `paths` config in `tsconfig.json`. The render function is fully typed — TypeScript will error if you pass the wrong data shape.
+The import `./templates/hello.html` resolves to `.typecek/templates/hello.html.ts` via the `rootDirs` config that `typecek init` set up. The render function is fully typed — TypeScript will error if you pass the wrong data shape.
+
+> **Note:** `rootDirs` is a compile-time feature. If you use `tsx` or `ts-node` to run directly without compiling, you'll need to add a `paths` mapping instead: `"@typecek/render/*": ["./.typecek/*"]` and import as `@typecek/render/templates/hello.html`.
 
 ### 5. Run it
 
@@ -167,7 +148,7 @@ npm run build
 2. `typecek compile` parsed the template, resolved the TypeScript type, validated all expressions, and generated a `render(data: Greeting): string` function
 3. You imported that function and called it with data — getting type-safe HTML output
 
-The generated render function (in `.typecek/src/templates/hello.html.ts`) looks roughly like:
+The generated render function (in `.typecek/templates/hello.html.ts`) looks roughly like:
 
 ```typescript
 import type { Greeting } from "../types";

@@ -6,10 +6,13 @@
     "strict": true,
     "esModuleInterop": true,
     "outDir": "./out",
-    "rootDir": ".",
+    "rootDirs": [
+      "./src",
+      "./.typecek"
+    ],
     "paths": {
       "@typecek/runtime": ["../packages/runtime/src/index.ts"],
-      "@typecek/render/*": ["./.typecek/src/*"]
+      "@typecek/render/*": ["./.typecek/*"]
     }
   },
   "include": ["src/**/*.ts", ".typecek/**/*.ts"]

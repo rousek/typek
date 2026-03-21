@@ -19,6 +19,7 @@ export function init(): void {
 
   let tsconfigChanged = false;
 
+  // Add .typecek to rootDirs
   if (!rootDirs.includes("./.typecek")) {
     rootDirs.push("./.typecek");
     compilerOptions.rootDirs = rootDirs;
@@ -33,9 +34,24 @@ export function init(): void {
     tsconfigChanged = true;
   }
 
+  // Remove rootDir — it conflicts with rootDirs when .typecek/ files are outside it
+  if (compilerOptions.rootDir) {
+    delete compilerOptions.rootDir;
+    tsconfigChanged = true;
+  }
+
+  // Ensure include covers .typecek/
+  const include: string[] = tsconfig.include ?? [];
+  const hasTypecekInclude = include.some((p: string) => p.startsWith(".typecek"));
+  if (!hasTypecekInclude) {
+    include.push(".typecek/**/*.ts");
+    tsconfig.include = include;
+    tsconfigChanged = true;
+  }
+
   if (tsconfigChanged) {
     fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + "\n");
-    console.log("Updated tsconfig.json with rootDirs.");
+    console.log("Updated tsconfig.json.");
   } else {
     console.log("tsconfig.json already configured.");
   }

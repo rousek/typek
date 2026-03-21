@@ -44,6 +44,8 @@ Misspell `{{naem}}`? The compiler tells you: `Property 'naem' does not exist on 
 
 ## Template Syntax
 
+See the [complete tag reference](docs/tags.md) for detailed documentation on each tag.
+
 ### Expressions
 
 ```
@@ -172,7 +174,10 @@ The first argument is the path to the partial template, the second is the data p
 
 ```bash
 npm install @typecek/cli @typecek/runtime
+npx typecek init
 ```
+
+> The CLI is also available as `typecku` for convenience.
 
 ### Compile
 
@@ -180,14 +185,12 @@ npm install @typecek/cli @typecek/runtime
 npx typecek compile
 ```
 
-> The CLI is also available as `typecku` for convenience.
-
-This finds all `.tc` files in your source directory, type-checks them, and outputs `.ts` files.
+This finds all `.tc` files in your source directory, type-checks them, and outputs render functions in `.typecek/`.
 
 ### Use in code
 
 ```typescript
-import renderUser from "@typecek/render/user-card.html";
+import renderUser from "./user-card.html";
 
 const html = renderUser({
   name: "Alice",
