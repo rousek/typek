@@ -258,6 +258,38 @@ export interface CompletionEntry {
   type: Type;
 }
 
+function addUndefined(type: Type): Type {
+  if (type.kind === TypeKind.Undefined) return type;
+  if (type.kind === TypeKind.Union) {
+    if (type.types.some(t => t.kind === TypeKind.Undefined)) return type;
+    return { kind: TypeKind.Union, types: [...type.types, { kind: TypeKind.Undefined }] };
+  }
+  return { kind: TypeKind.Union, types: [type, { kind: TypeKind.Undefined }] };
+}
+
+function deduplicateTypes(types: Type[]): Type[] {
+  const seen = new Set<string>();
+  const result: Type[] = [];
+  for (const t of types) {
+    const key = typeKey(t);
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(t);
+    }
+  }
+  return result;
+}
+
+function typeKey(t: Type): string {
+  if (t.kind === TypeKind.Object) return "object:" + [...t.properties.keys()].sort().join(",");
+  if (t.kind === TypeKind.Union) return "union:" + t.types.map(typeKey).sort().join("|");
+  if (t.kind === TypeKind.Array) return "array:" + typeKey(t.elementType);
+  if (t.kind === TypeKind.StringLiteral) return "strlit:" + t.value;
+  if (t.kind === TypeKind.NumberLiteral) return "numlit:" + t.value;
+  if (t.kind === TypeKind.BooleanLiteral) return "boollit:" + t.value;
+  return TypeKind[t.kind];
+}
+
 export function completionsAtPosition(
   ast: TemplateAST,
   dataType: Type,
@@ -271,11 +303,43 @@ export function completionsAtPosition(
       return [...type.properties.entries()].map(([name, t]) => ({ name, type: t }));
     }
     if (type.kind === TypeKind.Union) {
-      for (const t of type.types) {
-        if (t.kind === TypeKind.Null || t.kind === TypeKind.Undefined) continue;
-        const props = getProperties(t);
-        if (props.length > 0) return props;
+      const objectTypes = type.types.filter(
+        (t): t is Type & { kind: TypeKind.Object } =>
+          t.kind === TypeKind.Object,
+      );
+      if (objectTypes.length === 0) return [];
+
+      // Collect all property names across all object members
+      const allNames = new Set<string>();
+      for (const t of objectTypes) {
+        for (const name of t.properties.keys()) allNames.add(name);
       }
+
+      return [...allNames].map((name) => {
+        const memberTypes: Type[] = [];
+        let missingCount = 0;
+        for (const t of objectTypes) {
+          const prop = t.properties.get(name);
+          if (prop) {
+            memberTypes.push(prop);
+          } else {
+            missingCount++;
+          }
+        }
+        // If not present in all members, add undefined
+        let propType: Type;
+        if (memberTypes.length === 1) {
+          propType = memberTypes[0];
+        } else {
+          // Deduplicate identical types
+          const unique = deduplicateTypes(memberTypes);
+          propType = unique.length === 1 ? unique[0] : { kind: TypeKind.Union, types: unique };
+        }
+        if (missingCount > 0) {
+          propType = addUndefined(propType);
+        }
+        return { name, type: propType };
+      });
     }
     return [];
   }
@@ -405,16 +469,21 @@ export function resolveChainAtPosition(
       if (!prop) return undefined;
       type = prop;
     } else if (type.kind === TypeKind.Union) {
-      let found: Type | undefined;
-      for (const t of type.types) {
-        if (t.kind === TypeKind.Null || t.kind === TypeKind.Undefined) continue;
-        if (t.kind === TypeKind.Object) {
-          found = t.properties.get(name);
-          if (found) break;
+      const objectTypes = type.types.filter(t => t.kind === TypeKind.Object);
+      const memberTypes: Type[] = [];
+      let missingCount = 0;
+      for (const t of objectTypes) {
+        if (t.kind !== TypeKind.Object) continue;
+        const prop = t.properties.get(name);
+        if (prop) {
+          memberTypes.push(prop);
+        } else {
+          missingCount++;
         }
       }
-      if (!found) return undefined;
-      type = found;
+      if (memberTypes.length === 0) return undefined;
+      type = memberTypes.length === 1 ? memberTypes[0] : { kind: TypeKind.Union, types: deduplicateTypes(memberTypes) };
+      if (missingCount > 0) type = addUndefined(type);
     } else if (type.kind === TypeKind.Any) {
       return type;
     } else {

@@ -5,11 +5,35 @@ export function resolveProperty(type: Type, name: string): Type | undefined {
   if (type.kind === TypeKind.Any) return { kind: TypeKind.Any };
   if (type.kind === TypeKind.Object) return type.properties.get(name);
   if (type.kind === TypeKind.Union) {
-    for (const t of type.types) {
-      if (t.kind === TypeKind.Null || t.kind === TypeKind.Undefined) continue;
-      const resolved = resolveProperty(t, name);
-      if (resolved) return resolved;
+    const objectTypes = type.types.filter(
+      (t) => t.kind === TypeKind.Object,
+    );
+    const memberTypes: Type[] = [];
+    let missingCount = 0;
+    for (const t of objectTypes) {
+      if (t.kind !== TypeKind.Object) continue;
+      const prop = t.properties.get(name);
+      if (prop) {
+        memberTypes.push(prop);
+      } else {
+        missingCount++;
+      }
     }
+    if (memberTypes.length === 0) return undefined;
+    let result: Type = memberTypes.length === 1
+      ? memberTypes[0]
+      : { kind: TypeKind.Union, types: memberTypes };
+    if (missingCount > 0) {
+      // Property not present in all members — add undefined
+      if (result.kind === TypeKind.Union) {
+        if (!result.types.some(t => t.kind === TypeKind.Undefined)) {
+          result = { kind: TypeKind.Union, types: [...result.types, { kind: TypeKind.Undefined }] };
+        }
+      } else if (result.kind !== TypeKind.Undefined) {
+        result = { kind: TypeKind.Union, types: [result, { kind: TypeKind.Undefined }] };
+      }
+    }
+    return result;
   }
   return undefined;
 }
