@@ -121,7 +121,10 @@ function isTypecekDocument(document: vscode.TextDocument): boolean {
   return TYPEK_LANGUAGES.includes(document.languageId);
 }
 
+const resolveCache = new Map<string, { ast: ReturnType<typeof parse>; dataType: Type }>();
+
 function resolveDataType(document: vscode.TextDocument): { ast: ReturnType<typeof parse>; dataType: Type } | undefined {
+  const uri = document.uri.toString();
   try {
     const ast = parse(document.getText());
     if (!ast.typeDirective) return undefined;
@@ -129,9 +132,12 @@ function resolveDataType(document: vscode.TextDocument): { ast: ReturnType<typeo
     const templateDir = path.dirname(document.uri.fsPath);
     const typeFilePath = path.resolve(templateDir, from.endsWith(".ts") ? from : from + ".ts");
     const dataType = resolveType(typeFilePath, typeName);
-    return { ast, dataType };
+    const result = { ast, dataType };
+    resolveCache.set(uri, result);
+    return result;
   } catch {
-    return undefined;
+    // Return cached result when the document can't be parsed (e.g. mid-typing)
+    return resolveCache.get(uri);
   }
 }
 
@@ -474,10 +480,18 @@ function getCompletions(document: vscode.TextDocument, position: vscode.Position
   const dotMatch = textBefore.match(/(\w+(?:\.\w+)*)\.\s*(\w*)$/);
   if (dotMatch) {
     const chain = dotMatch[1].split(".");
+    const partial = dotMatch[2] || "";
     let type = resolveChainAtPosition(resolved.ast, resolved.dataType, chain, position.line);
     if (!type) return undefined;
     const items = getPropertyCompletions(type);
-    return new vscode.CompletionList(items, true);
+    const replaceRange = new vscode.Range(
+      position.line, position.character - partial.length,
+      position.line, position.character,
+    );
+    for (const item of items) {
+      item.range = replaceRange;
+    }
+    return items;
   }
 
   // Bare identifier completion
