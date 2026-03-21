@@ -65,10 +65,21 @@ export function getRegionAtOffset(regions: DocumentRegion[], offset: number): Do
 }
 
 /**
+ * Map of document language IDs to host languages.
+ * Add entries here to support new file types (e.g. "typecek-xml" -> "xml").
+ */
+const hostLanguageMap: Record<string, string> = {
+  "typecek-html": "html",
+  "typecek-ts": "typescript",
+};
+
+export function registerHostLanguage(documentLanguageId: string, hostLanguage: string): void {
+  hostLanguageMap[documentLanguageId] = hostLanguage;
+}
+
+/**
  * Determine the host language from the document language ID.
  */
 export function getHostLanguage(languageId: string): string {
-  if (languageId === "typecek-html") return "html";
-  if (languageId === "typecek-ts") return "typescript";
-  return "plaintext";
+  return hostLanguageMap[languageId] ?? "plaintext";
 }

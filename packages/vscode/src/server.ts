@@ -33,23 +33,15 @@ import {
   TypeKind,
   type Type,
 } from "@typecek/core";
-import {
-  getLanguageService as getHTMLLanguageService,
-  type LanguageService as HTMLLanguageService,
-} from "vscode-html-languageservice";
-import {
-  getCSSLanguageService,
-  type LanguageService as CSSLanguageService,
-} from "vscode-css-languageservice";
-import { scanRegions, getVirtualContent, getRegionAtOffset, getHostLanguage } from "./regions.js";
+import { scanRegions, getRegionAtOffset, getHostLanguage } from "./regions.js";
+import { registerEmbeddedLanguage, getEmbeddedLanguage } from "./embedded.js";
+import { HTMLEmbeddedService } from "./embedded-html.js";
+import { TypeScriptEmbeddedService } from "./embedded-typescript.js";
 import fs from "fs";
 import path from "path";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
-
-let htmlService: HTMLLanguageService;
-let cssService: CSSLanguageService;
 
 interface TypecekConfig {
   typecheckEnabled: boolean;
@@ -70,8 +62,8 @@ let globalConfig: TypecekConfig = {
 };
 
 connection.onInitialize((_params: InitializeParams): InitializeResult => {
-  htmlService = getHTMLLanguageService();
-  cssService = getCSSLanguageService();
+  registerEmbeddedLanguage("html", new HTMLEmbeddedService());
+  registerEmbeddedLanguage("typescript", new TypeScriptEmbeddedService());
 
   return {
     capabilities: {
@@ -191,18 +183,15 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
   const languageId = getLanguageId(document);
   const hostLang = getHostLanguage(languageId);
 
-  // Check if cursor is in a host language region
-  if (hostLang === "html") {
+  // Check if cursor is in a host language region — delegate to embedded service
+  const embedded = getEmbeddedLanguage(hostLang);
+  if (embedded) {
     const text = document.getText();
     const offset = document.offsetAt(params.position);
     const regions = scanRegions(text, hostLang);
     const region = getRegionAtOffset(regions, offset);
-
-    if (region && region.languageId === "html") {
-      const virtualContent = getVirtualContent(text, regions, "html");
-      const virtualDoc = TextDocument.create(document.uri, "html", document.version, virtualContent);
-      const htmlDoc = htmlService.parseHTMLDocument(virtualDoc);
-      const hover = htmlService.doHover(virtualDoc, params.position, htmlDoc);
+    if (region && region.languageId !== "typecek") {
+      const hover = embedded.doHover(document, params.position);
       if (hover) return hover;
     }
   }
@@ -324,6 +313,21 @@ connection.onDefinition((params: TextDocumentPositionParams): Location | null =>
   const document = documents.get(params.textDocument.uri);
   if (!document) return null;
 
+  // Check if cursor is in a host language region — delegate to embedded service
+  const languageId = getLanguageId(document);
+  const hostLang = getHostLanguage(languageId);
+  const embedded = getEmbeddedLanguage(hostLang);
+  if (embedded) {
+    const text = document.getText();
+    const offset = document.offsetAt(params.position);
+    const regions = scanRegions(text, hostLang);
+    const region = getRegionAtOffset(regions, offset);
+    if (region && region.languageId !== "typecek") {
+      const def = embedded.doDefinition(document, params.position);
+      if (def) return def;
+    }
+  }
+
   // File path definitions first
   const filePathDef = getFilePathDefinition(document, params.position);
   if (filePathDef) return filePathDef;
@@ -411,23 +415,13 @@ connection.onCompletion((params: CompletionParams): CompletionItem[] | null => {
   }
 
   // Delegate to embedded language service
-  if (hostLang === "html") {
-    return getHTMLCompletions(document, params);
+  const embedded = getEmbeddedLanguage(hostLang);
+  if (embedded) {
+    return embedded.doComplete(document, params.position);
   }
 
   return null;
 });
-
-function getHTMLCompletions(document: TextDocument, params: CompletionParams): CompletionItem[] | null {
-  const text = document.getText();
-  const hostLang = getHostLanguage(getLanguageId(document));
-  const regions = scanRegions(text, hostLang);
-  const virtualContent = getVirtualContent(text, regions, "html");
-  const virtualDoc = TextDocument.create(document.uri, "html", document.version, virtualContent);
-  const htmlDoc = htmlService.parseHTMLDocument(virtualDoc);
-  const result = htmlService.doComplete(virtualDoc, params.position, htmlDoc);
-  return result?.items ?? null;
-}
 
 function getTypecekCompletions(document: TextDocument, position: { line: number; character: number }, textBefore: string, lineText: string): CompletionItem[] | null {
   // 1. Tag name completion after {{# or {{/
@@ -622,6 +616,9 @@ documents.onDidChangeContent((change) => {
 documents.onDidClose((event) => {
   connection.sendDiagnostics({ uri: event.document.uri, diagnostics: [] });
   resolveCache.delete(event.document.uri);
+  const hostLang = getHostLanguage(getLanguageId(event.document));
+  const embedded = getEmbeddedLanguage(hostLang);
+  embedded?.onDocumentClose?.(event.document.uri);
   const timer = debounceTimers.get(event.document.uri);
   if (timer) {
     clearTimeout(timer);
