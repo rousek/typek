@@ -82,6 +82,8 @@ describe("cli", () => {
       fs.writeFileSync(path.join(tmpDir, "tsconfig.json"), JSON.stringify({
         compilerOptions: { rootDir: "./src" },
       }));
+      fs.writeFileSync(path.join(srcDir, "types.ts"),
+        'export interface User { name: string; }');
       fs.writeFileSync(path.join(srcDir, "test.html.tc"),
         '{{#import User from "./types"}}\n<h1>{{name}}</h1>');
 
@@ -111,6 +113,8 @@ describe("cli", () => {
       fs.writeFileSync(path.join(tmpDir, "tsconfig.json"), JSON.stringify({
         compilerOptions: { rootDir: "./src" },
       }));
+      fs.writeFileSync(path.join(srcDir, "types.ts"),
+        'export interface User { name: string; }');
       fs.writeFileSync(path.join(srcDir, "test.html.tc"),
         '{{#import User from "./types"}}\n<h1>{{name}}</h1>');
 
@@ -154,6 +158,8 @@ describe("cli", () => {
       fs.writeFileSync(path.join(tmpDir, "tsconfig.json"), JSON.stringify({
         compilerOptions: { rootDir: "./src" },
       }));
+      fs.writeFileSync(path.join(srcDir, "types.ts"),
+        'export interface CardProps { title: string; }');
       fs.writeFileSync(path.join(srcDir, "card.html.tc"),
         '{{#import CardProps from "./types"}}\n<div>{{title}}</div>');
 
