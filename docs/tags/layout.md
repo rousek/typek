@@ -51,6 +51,24 @@ A layout template is a regular `.tc` file that contains exactly one `{{@content}
 {{/layout}}
 ```
 
+Where the types are defined as:
+
+```typescript
+interface PageLayout {
+  title: string;
+  heading: string;
+}
+
+interface StorePage {
+  title: string;
+  description: string;
+  products: Product[];
+  featuredProduct: Product | null;
+  categories: string[];
+  layout: PageLayout;
+}
+```
+
 The `layout` expression is a property on the page's data type that matches the layout template's expected type.
 
 ## Validation

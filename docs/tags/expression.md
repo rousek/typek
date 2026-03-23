@@ -22,6 +22,7 @@ Typecek supports the following expression types:
 |------------|---------|-------------|
 | Identifier | `{{name}}` | Access a property on the current data object |
 | Property access | `{{user.address.city}}` | Dot-separated property chain |
+| Optional chaining | `{{user.address?.city}}` | Safe access on nullable properties — returns `undefined` instead of erroring if the value is null |
 | Arithmetic | `{{price * quantity}}` | `+`, `-`, `*`, `/` |
 | Comparison | `{{age >= 18}}` | `==`, `!=`, `<`, `>`, `<=`, `>=` |
 | Logical | `{{isActive && !isHidden}}` | `&&`, `\|\|`, `!` |

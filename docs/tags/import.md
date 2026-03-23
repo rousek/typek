@@ -38,6 +38,18 @@ The import directive tells the Typecek compiler:
 - The type must be **exported** from the referenced file (`export interface` or `export type`)
 - The path is relative to the template file, just like TypeScript imports
 
+## Static templates
+
+Templates that contain only static markup (no `{{expressions}}`, `{{#if}}`, `{{#for}}`, etc.) don't need an import directive. This is useful for simple partials like footers or headers:
+
+```
+<footer>
+  <p>&copy; 2025 Acme Corp</p>
+</footer>
+```
+
+Any template that uses expressions or block tags without an `{{#import}}` will produce a compiler error.
+
 ## Type resolution
 
 The compiler uses the TypeScript compiler API to resolve the type. It supports:

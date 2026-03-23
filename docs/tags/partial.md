@@ -1,6 +1,6 @@
 # `{{> partial}}`
 
-Renders another template inline, passing data to it. The partial is a regular `.tc` file with its own `{{#import}}` directive.
+Renders another template inline, passing data to it. The partial is a regular `.tc` file that can optionally have its own `{{#import}}` directive for type safety.
 
 ## Syntax
 
@@ -51,4 +51,12 @@ Without data:
 
 ```
 {{> "./footer.html.tc"}}
+```
+
+Partials without expressions don't need a `{{#import}}` directive — they can contain plain static markup:
+
+```
+<footer>
+  <p>&copy; 2025 Acme Corp</p>
+</footer>
 ```

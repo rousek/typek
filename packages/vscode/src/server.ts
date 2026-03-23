@@ -22,6 +22,7 @@ import {
   parse,
   ParseError,
   typecheck,
+  checkMissingImport,
   resolveType,
   listExportedTypes,
   findDeclaration,
@@ -649,6 +650,18 @@ function checkDocument(document: TextDocument): void {
     const dir = ast.typeDirective;
 
     if (!dir) {
+      const missingImportDiags = checkMissingImport(ast.body);
+      for (const diag of missingImportDiags) {
+        diagnostics.push({
+          range: {
+            start: { line: diag.line, character: diag.column },
+            end: { line: diag.line, character: diag.column + diag.length },
+          },
+          message: diag.message,
+          severity: DiagnosticSeverity.Error,
+          source: "typecek",
+        });
+      }
       connection.sendDiagnostics({ uri: document.uri, diagnostics });
       return;
     }

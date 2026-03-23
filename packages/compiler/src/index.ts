@@ -2,6 +2,7 @@ import {
   parse,
   NodeType,
   typecheck,
+  checkMissingImport,
   resolveType,
   type ASTNode,
   type ExprNode,
@@ -56,6 +57,12 @@ export function compile(options: CompileOptions): CompileResult {
         length: 0,
       }];
     }
+  }
+
+  // Check for expressions used without {{#import}} — these would reference
+  // an undefined `data` parameter and fail at runtime.
+  if (!typeName) {
+    diagnostics.push(...checkMissingImport(ast.body));
   }
 
   let loopCounter = 0;

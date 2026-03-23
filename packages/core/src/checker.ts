@@ -107,6 +107,43 @@ function resolveTemplateType(templateDir: string, refPath: string): TemplateReso
   }
 }
 
+/** Check for expressions/blocks that require data in a template without {{#import}}. */
+export function checkMissingImport(body: ASTNode[]): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const msg = "Expressions require a {{#import}} type directive";
+
+  function check(nodes: ASTNode[]): void {
+    for (const node of nodes) {
+      switch (node.type) {
+        case NodeType.Expression:
+          diagnostics.push({ message: msg, severity: "error", line: node.line, column: node.column, length: 2 });
+          break;
+        case NodeType.RawExpression:
+          diagnostics.push({ message: msg, severity: "error", line: node.line, column: node.column, length: 3 });
+          break;
+        case NodeType.IfBlock:
+          diagnostics.push({ message: msg, severity: "error", line: node.line, column: node.column, length: 5 });
+          break;
+        case NodeType.ForBlock:
+          diagnostics.push({ message: msg, severity: "error", line: node.line, column: node.column, length: 6 });
+          break;
+        case NodeType.SwitchBlock:
+          diagnostics.push({ message: msg, severity: "error", line: node.line, column: node.column, length: 10 });
+          break;
+        case NodeType.WithBlock:
+          diagnostics.push({ message: msg, severity: "error", line: node.line, column: node.column, length: 8 });
+          break;
+        case NodeType.LayoutBlock:
+          check(node.body);
+          break;
+      }
+    }
+  }
+
+  check(body);
+  return diagnostics;
+}
+
 export interface TypecheckContext {
   templateDir: string;
 }
