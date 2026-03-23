@@ -12,29 +12,32 @@ VS Code extension for [Typecek](https://github.com/rousek/typecek) — a typed t
 
 Errors appear inline as you type — misspelled properties, type mismatches, missing imports, and invalid tag usage are all caught instantly without running the compiler.
 
+![Type error diagnostics](https://raw.githubusercontent.com/rousek/typecek/main/resources/demos/error.gif)
+
 ### Autocomplete
 
-- **Properties** — suggests properties from the imported TypeScript type, scoped to the current context (`{{#with}}`, `{{#for}}`)
-- **Block tags** — snippet completions for `{{#if}}...{{/if}}`, `{{#for}}...{{/for}}`, etc.
-- **Import paths** — completes file paths in `{{#import ... from "..."}}` directives
+Property completions, loop variables, tag snippets, and import paths — all driven by your TypeScript types.
 
-### Hover information
+![Autocomplete](https://raw.githubusercontent.com/rousek/typecek/main/resources/demos/for_loop.gif)
 
-- **Type info** — hover over any expression to see its resolved type (e.g. `user.name: string`, `items: Product[]`)
-- **Tag help** — hover over block tags to see syntax documentation and examples
+### Union types
+
+Properties are resolved across all union members, with type narrowing inside `{{#if}}` blocks.
+
+![Union type support](https://raw.githubusercontent.com/rousek/typecek/main/resources/demos/duck_typing.gif)
 
 ### Go to Definition
 
-- **Ctrl+Click** on a property to jump to its TypeScript type definition
-- **Ctrl+Click** on file paths in `{{#import}}`, `{{#layout}}`, and `{{> partial}}` to open the referenced file
+Ctrl+Click any property to jump to its TypeScript type definition. Also works on file paths in `{{#import}}`, `{{#layout}}`, and `{{> partial}}`.
 
-### Syntax highlighting
+![Go to Definition](https://raw.githubusercontent.com/rousek/typecek/main/resources/demos/go_to_definition.gif)
 
-Full TextMate grammar support for `.tc`, `.html.tc`, and `.ts.tc` files with embedded HTML and TypeScript highlighting.
+### Also included
 
-### File icon
-
-Custom diamond icon for `.tc` files in the explorer and tabs.
+- **Hover info** — see resolved types (`user.name: string`) and tag syntax help
+- **Syntax highlighting** — full TextMate grammar for `.tc`, `.html.tc`, and `.ts.tc` with embedded HTML/TypeScript
+- **Embedded language support** — HTML and CSS completions inside host language regions
+- **Custom file icon** — diamond icon for `.tc` files in the explorer and tabs
 
 ## Settings
 
