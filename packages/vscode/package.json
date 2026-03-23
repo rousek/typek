@@ -2,7 +2,7 @@
   "name": "typecek-vscode",
   "displayName": "Typecek",
   "description": "Syntax highlighting and type checking for Typecek typed templates (.tc files)",
-  "version": "0.0.3",
+  "version": "0.0.9",
   "publisher": "typecek",
   "engines": {
     "vscode": "^1.110.0"
@@ -122,7 +122,9 @@
       {
         "scopeName": "text.html.typecek.injection",
         "path": "./syntaxes/typecek-html-injection.tmLanguage.json",
-        "injectTo": ["text.html.typecek"]
+        "injectTo": [
+          "text.html.typecek"
+        ]
       }
     ]
   },
