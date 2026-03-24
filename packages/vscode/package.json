@@ -2,7 +2,7 @@
   "name": "typecek-vscode",
   "displayName": "Typecek",
   "description": "Syntax highlighting and type checking for Typecek typed templates (.tc files)",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "publisher": "typecek",
   "engines": {
     "vscode": "^1.110.0"
