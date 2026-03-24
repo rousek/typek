@@ -1,17 +1,39 @@
 import ts from "typescript";
+import fs from "fs";
 import { TypeKind, type Type } from "./types.js";
+
+// Cache TS programs by file path + mtime to avoid re-parsing unchanged files
+const programCache = new Map<string, { program: ts.Program; mtimeMs: number }>();
+
+const compilerOptions: ts.CompilerOptions = {
+  strict: true,
+  target: ts.ScriptTarget.ESNext,
+  module: ts.ModuleKind.ESNext,
+  moduleResolution: ts.ModuleResolutionKind.Bundler,
+  noEmit: true,
+};
+
+function getProgram(filePath: string): ts.Program {
+  let mtimeMs = 0;
+  try {
+    mtimeMs = fs.statSync(filePath).mtimeMs;
+  } catch {}
+
+  const cached = programCache.get(filePath);
+  if (cached && cached.mtimeMs === mtimeMs) {
+    return cached.program;
+  }
+
+  const program = ts.createProgram([filePath], compilerOptions, undefined, cached?.program);
+  programCache.set(filePath, { program, mtimeMs });
+  return program;
+}
 
 /**
  * Resolves a TypeScript type from a source file into the internal type representation.
  */
 export function resolveType(filePath: string, typeName: string): Type {
-  const program = ts.createProgram([filePath], {
-    strict: true,
-    target: ts.ScriptTarget.ESNext,
-    module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler,
-    noEmit: true,
-  });
+  const program = getProgram(filePath);
 
   const sourceFile = program.getSourceFile(filePath);
   if (!sourceFile) {
@@ -45,13 +67,7 @@ export function resolveType(filePath: string, typeName: string): Type {
  * Lists all exported interface and type alias names from a TypeScript source file.
  */
 export function listExportedTypes(filePath: string): string[] {
-  const program = ts.createProgram([filePath], {
-    strict: true,
-    target: ts.ScriptTarget.ESNext,
-    module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler,
-    noEmit: true,
-  });
+  const program = getProgram(filePath);
 
   const sourceFile = program.getSourceFile(filePath);
   if (!sourceFile) return [];
@@ -86,13 +102,7 @@ export function findDeclaration(
   typeName: string,
   propertyPath: string[],
 ): DeclarationLocation | undefined {
-  const program = ts.createProgram([filePath], {
-    strict: true,
-    target: ts.ScriptTarget.ESNext,
-    module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler,
-    noEmit: true,
-  });
+  const program = getProgram(filePath);
 
   const sourceFile = program.getSourceFile(filePath);
   if (!sourceFile) return undefined;

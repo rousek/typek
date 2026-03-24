@@ -1,4 +1,4 @@
-<h1><img src="resources/tc_logo.svg" alt="" width="36" style="vertical-align: middle;" />&nbsp;Typecek</h1>
+# Typecek
 
 [![CI](https://github.com/rousek/typecek/actions/workflows/ci.yml/badge.svg)](https://github.com/rousek/typecek/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@typecek/cli)](https://www.npmjs.com/package/@typecek/cli) [![License](https://img.shields.io/github/license/rousek/typecek)](https://github.com/rousek/typecek/blob/main/LICENSE) [![VS Code](https://img.shields.io/visual-studio-marketplace/v/typecek.typecek-vscode?label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=typecek.typecek-vscode)
 

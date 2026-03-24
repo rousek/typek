@@ -129,7 +129,7 @@
     ]
   },
   "scripts": {
-    "build": "esbuild src/client.ts --bundle --outfile=dist/client.js --external:vscode --external:typescript --format=cjs --platform=node --sourcemap && esbuild src/server.ts --bundle --outfile=dist/server.js --external:typescript --format=cjs --platform=node --sourcemap --main-fields=module,main",
+    "build": "esbuild src/client.ts --bundle --outfile=dist/client.js --external:vscode --format=cjs --platform=node --sourcemap && esbuild src/server.ts --bundle --outfile=dist/server.js --format=cjs --platform=node --sourcemap --main-fields=module,main",
     "build:tsc": "tsc -b",
     "clean": "rm -rf dist *.tsbuildinfo",
     "package": "pnpm build && vsce package",

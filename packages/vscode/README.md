@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="icons/tc_logo_128.png" alt="Typecek" width="100" />
-</p>
-
-<h1 align="center">Typecek for VS Code</h1>
+# Typecek for VS Code
 
 VS Code extension for [Typecek](https://github.com/rousek/typecek) — a typed templating language for TypeScript. Provides real-time diagnostics, autocomplete, hover info, and navigation for `.tc` template files.
 
