@@ -1,0 +1,26 @@
+{{#import DashboardCard from "../models/benchmark-types"}}
+<div class="card" style="border-left: 4px solid {{color}}">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-muted">{{title}}</p>
+      <h3>{{value}}</h3>
+      <p class="text-muted">{{subtitle}}</p>
+    </div>
+    <div>
+      <span>{{icon}}</span>
+    </div>
+  </div>
+  <div class="mt-4">
+    {{#switch trend}}
+    {{#case "up"}}
+    <span class="text-success">+{{changePercent}}%</span>
+    {{/case}}
+    {{#case "down"}}
+    <span class="text-danger">-{{changePercent}}%</span>
+    {{/case}}
+    {{#case "flat"}}
+    <span class="text-muted">0%</span>
+    {{/case}}
+    {{/switch}}
+  </div>
+</div>
