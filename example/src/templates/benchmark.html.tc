@@ -615,9 +615,9 @@
         <span class="text-muted">(SKU: {{variant.sku}})</span>
       </div>
       <div class="flex items-center gap-2">
-        <span>{{../../../currency}}{{variant.price}}</span>
+        <span>{{../currency}}{{variant.price}}</span>
         {{#if variant.compareAtPrice}}
-        <span style="text-decoration: line-through; color: #999;">{{../../../currency}}{{variant.compareAtPrice}}</span>
+        <span style="text-decoration: line-through; color: #999;">{{../currency}}{{variant.compareAtPrice}}</span>
         {{/if}}
         {{#if variant.inStock}}
         <span class="badge text-success">In Stock ({{variant.stockQuantity}})</span>
@@ -712,7 +712,7 @@
         {{#for variant in product.variants}}
         <div class="flex justify-between" style="padding: 4px 0;">
           <span>{{variant.name}}</span>
-          <span>{{../../currency}}{{variant.price}}</span>
+          <span>{{currency}}{{variant.price}}</span>
         </div>
         {{#empty}}
         <p class="text-muted">Single variant only</p>
@@ -833,10 +833,10 @@
             {{#for item in order.items}}
             <div class="flex justify-between" style="padding: 2px 0;">
               <span>{{item.product.name}}</span>
-              <span>x{{item.quantity}} @ {{../../currency}}{{item.unitPrice}}</span>
+              <span>x{{item.quantity}} @ {{currency}}{{item.unitPrice}}</span>
             </div>
             {{#if item.discount > 0}}
-            <span class="text-success">Discount: -{{../../currency}}{{item.discount}}</span>
+            <span class="text-success">Discount: -{{currency}}{{item.discount}}</span>
             {{/if}}
             {{#if item.variant}}
             <span class="text-muted">({{item.variant.name}} - {{item.variant.sku}})</span>
@@ -1003,15 +1003,15 @@
                     {{/if}}
                   </td>
                   <td>{{item.quantity}}</td>
-                  <td>{{../../../currency}}{{item.unitPrice}}</td>
+                  <td>{{currency}}{{item.unitPrice}}</td>
                   <td>
                     {{#if item.discount > 0}}
-                    <span class="text-success">-{{../../../currency}}{{item.discount}}</span>
+                    <span class="text-success">-{{currency}}{{item.discount}}</span>
                     {{#else}}
                     <span class="text-muted">-</span>
                     {{/if}}
                   </td>
-                  <td>{{../../../currency}}{{item.unitPrice * item.quantity}}</td>
+                  <td>{{currency}}{{item.unitPrice * item.quantity}}</td>
                 </tr>
                 {{/for}}
               </tbody>
@@ -1330,9 +1330,9 @@
 
       {{#for item in order.items}}
       <div style="padding: 4px 16px;">
-        <span>{{item.product.name}}: {{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+        <span>{{item.product.name}}: {{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         {{#if item.discount > 0}}
-        <span class="text-success"> (save {{../../currency}}{{item.discount}})</span>
+        <span class="text-success"> (save {{currency}}{{item.discount}})</span>
         {{/if}}
       </div>
       {{/for}}
@@ -1563,9 +1563,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -1655,7 +1655,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -1919,9 +1919,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -2011,7 +2011,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -2275,9 +2275,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -2367,7 +2367,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -2631,9 +2631,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -2723,7 +2723,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -2987,9 +2987,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -3079,7 +3079,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -3343,9 +3343,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -3435,7 +3435,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -3699,9 +3699,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -3791,7 +3791,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -4055,9 +4055,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -4147,7 +4147,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -4411,9 +4411,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -4503,7 +4503,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -4767,9 +4767,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -4859,7 +4859,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -5123,9 +5123,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -5215,7 +5215,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -5479,9 +5479,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -5571,7 +5571,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -5835,9 +5835,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -5927,7 +5927,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -6191,9 +6191,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -6283,7 +6283,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -6547,9 +6547,9 @@
             <div class="flex justify-between" style="padding: 4px 0; border-bottom: 1px dotted #eee;">
               <span>{{variant.name}} ({{variant.sku}})</span>
               <span>
-                {{../../currency}}{{variant.price}}
+                {{currency}}{{variant.price}}
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">({{variant.stockQuantity}} left)</span>
@@ -6639,7 +6639,7 @@
         {{#for item in order.items}}
         <div class="flex justify-between" style="padding: 2px 0;">
           <span>{{item.product.name}} ({{item.product.category.name}})</span>
-          <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} = {{../../currency}}{{item.unitPrice * item.quantity}}</span>
+          <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} = {{currency}}{{item.unitPrice * item.quantity}}</span>
         </div>
         {{/for}}
       </div>
@@ -6861,9 +6861,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -6948,7 +6948,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -7101,9 +7101,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -7188,7 +7188,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -7341,9 +7341,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -7428,7 +7428,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -7581,9 +7581,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -7668,7 +7668,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -7821,9 +7821,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -7908,7 +7908,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -8061,9 +8061,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -8148,7 +8148,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -8301,9 +8301,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -8388,7 +8388,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -8541,9 +8541,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -8628,7 +8628,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -8781,9 +8781,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -8868,7 +8868,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -9021,9 +9021,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -9108,7 +9108,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -9261,9 +9261,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -9348,7 +9348,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -9501,9 +9501,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -9588,7 +9588,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -9741,9 +9741,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -9828,7 +9828,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -9981,9 +9981,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -10068,7 +10068,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -10221,9 +10221,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -10308,7 +10308,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -10461,9 +10461,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -10548,7 +10548,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -10701,9 +10701,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -10788,7 +10788,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 
@@ -10941,9 +10941,9 @@
                 <span class="text-muted">({{variant.sku}})</span>
               </div>
               <div class="flex items-center gap-2">
-                <span>{{../../currency}}{{variant.price}}</span>
+                <span>{{currency}}{{variant.price}}</span>
                 {{#if variant.compareAtPrice}}
-                <span style="text-decoration: line-through;" class="text-muted">{{../../currency}}{{variant.compareAtPrice}}</span>
+                <span style="text-decoration: line-through;" class="text-muted">{{currency}}{{variant.compareAtPrice}}</span>
                 {{/if}}
                 {{#if variant.inStock}}
                 <span class="text-success">{{variant.stockQuantity}} in stock</span>
@@ -11028,7 +11028,7 @@
       {{#for item in order.items}}
       <div style="padding: 4px 20px;" class="flex justify-between">
         <span>{{item.product.name}} ({{item.product.category.name}})</span>
-        <span>{{item.quantity}} x {{../../currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{../../currency}}{{item.discount}}</span>{{/if}}</span>
+        <span>{{item.quantity}} x {{currency}}{{item.unitPrice}} {{#if item.discount > 0}}<span class="text-success">-{{currency}}{{item.discount}}</span>{{/if}}</span>
       </div>
       {{/for}}
 

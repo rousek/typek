@@ -195,7 +195,7 @@ export interface ShippingInfo {
   trackingNumber: string | null;
   estimatedDelivery: string | null;
   cost: number;
-  address: UserAddress;
+  address: UserAddress | null;
 }
 
 export interface PaymentInfo {

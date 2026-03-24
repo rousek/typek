@@ -4,7 +4,7 @@ import {
   type ExprNode,
   type TemplateAST,
 } from "./parser.js";
-import { TypeKind, type Type } from "./types.js";
+import { TypeKind, narrowNullish, type Type } from "./types.js";
 import { TypeResolver, resolveProperty, formatExpr } from "./type-resolver.js";
 
 export interface HoverResult {
@@ -169,7 +169,8 @@ export function typeAtPosition(
         const exprResult = findInExpr(node.expression);
         if (exprResult) return exprResult;
 
-        const withType = resolver.resolveExprType(node.expression);
+        const rawWithType = resolver.resolveExprType(node.expression);
+        const withType = narrowNullish(rawWithType) ?? rawWithType;
         const withPath = resolveExprPath(node.expression);
         resolver.pushScope(withType);
         scopePathStack.push(withPath);
@@ -384,7 +385,8 @@ export function completionsAtPosition(
       }
       case NodeType.WithBlock: {
         if (line > node.endLine) break;
-        const withType = resolver.resolveExprType(node.expression);
+        const rawWithType = resolver.resolveExprType(node.expression);
+        const withType = narrowNullish(rawWithType) ?? rawWithType;
         resolver.pushScope(withType);
         bestResult = buildResult();
         walkNodes(node.body);

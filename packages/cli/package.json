@@ -5,16 +5,19 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "typecek": "dist/bin.js",
-    "typecku": "dist/bin.js"
+    "typecek": "dist/bin.bundled.js",
+    "typecku": "dist/bin.bundled.js"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && esbuild dist/bin.js --bundle --outfile=dist/bin.bundled.js --format=cjs --platform=node --main-fields=module,main",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "@typecek/core": "workspace:*",
     "@typecek/compiler": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.4"
   },
   "files": [
     "dist"

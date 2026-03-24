@@ -337,7 +337,8 @@ export function parse(template: string): TemplateAST {
         i > 0 &&
         tokens[i - 1].type === TokenType.OpenBlock
       ) {
-        throw new Error("Only one {{#import}} is allowed per template");
+        const tok = tokens[i - 1];
+        throw new ParseError("Only one {{#import}} is allowed per template", tok.line, tok.column, tok.value.length);
       }
     }
   }

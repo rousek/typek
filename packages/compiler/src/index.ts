@@ -89,11 +89,13 @@ export function compile(options: CompileOptions): CompileResult {
     return scopeVarStack[scopeVarStack.length - 1];
   }
 
-  function scopeVarAtDepth(depth: number): string {
+  function scopeVarAtDepth(depth: number, node?: { line: number; column: number }): string {
     const idx = scopeVarStack.length - 1 - depth;
     if (idx < 0) {
       const maxDepth = scopeVarStack.length - 1;
-      throw new Error(`'${"../".repeat(depth)}' goes ${depth} level(s) up, but only ${maxDepth} level(s) of scope exist`);
+      const err: any = new Error(`'${"../".repeat(depth)}' goes ${depth} level(s) up, but only ${maxDepth} level(s) of scope exist`);
+      if (node) { err.line = node.line; err.column = node.column; }
+      throw err;
     }
     return scopeVarStack[idx];
   }
@@ -109,7 +111,7 @@ export function compile(options: CompileOptions): CompileResult {
   function compileExpr(node: ExprNode): string {
     switch (node.type) {
       case NodeType.Identifier:
-        if (node.depth > 0) return `${scopeVarAtDepth(node.depth)}.${node.name}`;
+        if (node.depth > 0) return `${scopeVarAtDepth(node.depth, node)}.${node.name}`;
         if (isLoopVariable(node.name)) return node.name;
         return `${currentScopeVar()}.${node.name}`;
       case NodeType.PropertyAccess:
@@ -122,8 +124,12 @@ export function compile(options: CompileOptions): CompileResult {
         return JSON.stringify(node.value);
       case NodeType.NumberLiteral:
         return String(node.value);
-      default:
-        throw new Error(`Unknown expression node type: ${(node as ExprNode).type}`);
+      default: {
+        const err: any = new Error(`Unknown expression node type: ${(node as ExprNode).type}`);
+        err.line = (node as ExprNode).line;
+        err.column = (node as ExprNode).column;
+        throw err;
+      }
     }
   }
 

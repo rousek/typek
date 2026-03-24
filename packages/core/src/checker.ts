@@ -7,7 +7,7 @@ import {
   type ExprNode,
   type TemplateAST,
 } from "./parser.js";
-import { TypeKind, formatType, type Type } from "./types.js";
+import { TypeKind, formatType, narrowNullish, type Type } from "./types.js";
 import { resolveType } from "./resolver.js";
 import { TypeResolver, formatExpr, type ErrorHandler } from "./type-resolver.js";
 
@@ -271,7 +271,18 @@ export function typecheck(ast: TemplateAST, dataType: Type, context?: TypecheckC
       }
 
       case NodeType.WithBlock: {
-        const withType = resolver.resolveExprType(node.expression);
+        const rawType = resolver.resolveExprType(node.expression);
+        const withType = narrowNullish(rawType);
+        if (!withType) {
+          diagnostics.push({
+            message: `Expression is always null or undefined`,
+            severity: "error",
+            line: node.line,
+            column: node.column,
+            length: 4,
+          });
+          break;
+        }
         resolver.pushScope(withType);
         node.body.forEach(checkNode);
         resolver.popScope();

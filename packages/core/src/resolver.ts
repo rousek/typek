@@ -1,5 +1,6 @@
 import ts from "typescript";
 import fs from "fs";
+import path from "path";
 import { TypeKind, type Type } from "./types.js";
 
 // Cache TS programs by file path + mtime to avoid re-parsing unchanged files
@@ -13,6 +14,36 @@ const compilerOptions: ts.CompilerOptions = {
   noEmit: true,
 };
 
+// Locate the TypeScript lib directory. When TS is bundled (e.g. in the VS Code
+// extension), ts.getDefaultLibFilePath() points to a non-existent path inside
+// the bundle. We find the real lib directory by looking for typescript/lib in
+// node_modules relative to the target file.
+function findTsLibDir(fromDir: string): string | undefined {
+  const defaultLib = ts.getDefaultLibFilePath(compilerOptions);
+  if (fs.existsSync(defaultLib)) return path.dirname(defaultLib);
+
+  // Walk up from the target file to find node_modules/typescript/lib
+  let dir = fromDir;
+  while (true) {
+    const candidate = path.join(dir, "node_modules", "typescript", "lib");
+    if (fs.existsSync(path.join(candidate, "lib.esnext.full.d.ts"))) return candidate;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return undefined;
+}
+
+function createHost(filePath: string, options: ts.CompilerOptions): ts.CompilerHost | undefined {
+  const libDir = findTsLibDir(path.dirname(filePath));
+  if (!libDir) return undefined;
+
+  const host = ts.createCompilerHost(options);
+  host.getDefaultLibFileName = () => path.join(libDir, ts.getDefaultLibFileName(options));
+  host.getDefaultLibLocation = () => libDir;
+  return host;
+}
+
 function getProgram(filePath: string): ts.Program {
   let mtimeMs = 0;
   try {
@@ -24,7 +55,8 @@ function getProgram(filePath: string): ts.Program {
     return cached.program;
   }
 
-  const program = ts.createProgram([filePath], compilerOptions, undefined, cached?.program);
+  const host = createHost(filePath, compilerOptions);
+  const program = ts.createProgram([filePath], compilerOptions, host, cached?.program);
   programCache.set(filePath, { program, mtimeMs });
   return program;
 }
@@ -228,7 +260,8 @@ function convertType(tsType: ts.Type, checker: ts.TypeChecker, seen: Set<number>
     return { kind: TypeKind.Array, elementType };
   }
 
-  // Object / Interface — check for properties (with circular reference guard)
+  // Object / Interface — circular reference guard using internal type id.
+  // Arrays are already handled above so their shared ids won't collide here.
   const typeId = (tsType as { id?: number }).id;
   if (typeId !== undefined && seen.has(typeId)) return { kind: TypeKind.Any };
   if (typeId !== undefined) seen.add(typeId);
@@ -247,7 +280,6 @@ function convertType(tsType: ts.Type, checker: ts.TypeChecker, seen: Set<number>
   if (typeId !== undefined) seen.delete(typeId);
 
   if (properties.size > 0) {
-    // Preserve the type name if it has a symbol (named interface/type alias)
     const symbol = tsType.getSymbol() ?? tsType.aliasSymbol;
     const name = symbol?.name && symbol.name !== "__type" ? symbol.name : undefined;
     return { kind: TypeKind.Object, properties, name };

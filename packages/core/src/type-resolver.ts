@@ -1,13 +1,42 @@
 import { NodeType, type ExprNode } from "./parser.js";
-import { TypeKind, type Type } from "./types.js";
+import { TypeKind, flattenUnion, type Type } from "./types.js";
+
+function dedupeTypes(types: Type[]): Type[] {
+  const seen = new Set<string>();
+  const result: Type[] = [];
+  for (const t of types) {
+    const key = typeKey(t);
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(t);
+    }
+  }
+  return result;
+}
+
+function typeKey(type: Type): string {
+  switch (type.kind) {
+    case TypeKind.Null: return "null";
+    case TypeKind.Undefined: return "undefined";
+    case TypeKind.String: return "string";
+    case TypeKind.Number: return "number";
+    case TypeKind.Boolean: return "boolean";
+    case TypeKind.Any: return "any";
+    case TypeKind.StringLiteral: return `"${type.value}"`;
+    case TypeKind.NumberLiteral: return `${type.value}`;
+    case TypeKind.BooleanLiteral: return `${type.value}`;
+    case TypeKind.Array: return `Array<${typeKey(type.elementType)}>`;
+    case TypeKind.Object: return type.name ?? `{${[...type.properties.keys()].join(",")}}`;
+    case TypeKind.Union: return type.types.map(typeKey).sort().join("|");
+  }
+}
 
 export function resolveProperty(type: Type, name: string): Type | undefined {
   if (type.kind === TypeKind.Any) return { kind: TypeKind.Any };
   if (type.kind === TypeKind.Object) return type.properties.get(name);
   if (type.kind === TypeKind.Union) {
-    const objectTypes = type.types.filter(
-      (t) => t.kind === TypeKind.Object,
-    );
+    const flat = flattenUnion(type);
+    const objectTypes = flat.filter((t) => t.kind === TypeKind.Object);
     const memberTypes: Type[] = [];
     let missingCount = 0;
     for (const t of objectTypes) {
@@ -20,9 +49,10 @@ export function resolveProperty(type: Type, name: string): Type | undefined {
       }
     }
     if (memberTypes.length === 0) return undefined;
-    let result: Type = memberTypes.length === 1
-      ? memberTypes[0]
-      : { kind: TypeKind.Union, types: memberTypes };
+    const deduped = dedupeTypes(memberTypes.flatMap(flattenUnion));
+    let result: Type = deduped.length === 1
+      ? deduped[0]
+      : { kind: TypeKind.Union, types: deduped };
     if (missingCount > 0) {
       // Property not present in all members — add undefined
       if (result.kind === TypeKind.Union) {
@@ -187,12 +217,13 @@ export class TypeResolver {
         // Optional chaining: strip null/undefined before resolving
         let wasNullable = false;
         if (node.optional && objectType.kind === TypeKind.Union) {
-          const nonNullish = objectType.types.filter(
+          const flat = flattenUnion(objectType);
+          const nonNullish = flat.filter(
             t => t.kind !== TypeKind.Null && t.kind !== TypeKind.Undefined,
           );
-          wasNullable = nonNullish.length < objectType.types.length;
+          wasNullable = nonNullish.length < flat.length;
           if (nonNullish.length === 0) return { kind: TypeKind.Undefined };
-          objectType = nonNullish.length === 1 ? nonNullish[0] : { kind: TypeKind.Union, types: nonNullish };
+          objectType = nonNullish.length === 1 ? nonNullish[0] : { kind: TypeKind.Union, types: dedupeTypes(nonNullish) };
         } else if (node.optional && (objectType.kind === TypeKind.Null || objectType.kind === TypeKind.Undefined)) {
           return { kind: TypeKind.Undefined };
         }

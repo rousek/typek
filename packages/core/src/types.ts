@@ -72,6 +72,28 @@ export type Type =
   | TBooleanLiteral;
 
 /**
+ * Recursively flattens nested unions into a flat array of non-union types.
+ */
+export function flattenUnion(type: Type): Type[] {
+  if (type.kind !== TypeKind.Union) return [type];
+  return type.types.flatMap(flattenUnion);
+}
+
+/**
+ * Removes null and undefined from a type (like TypeScript's truthiness narrowing).
+ * Returns undefined if the type is entirely nullish.
+ */
+export function narrowNullish(type: Type): Type | undefined {
+  const flat = flattenUnion(type);
+  const filtered = flat.filter(
+    t => t.kind !== TypeKind.Null && t.kind !== TypeKind.Undefined,
+  );
+  if (filtered.length === 0) return undefined;
+  if (filtered.length === 1) return filtered[0];
+  return { kind: TypeKind.Union, types: filtered };
+}
+
+/**
  * Formats a type as a multi-line TypeScript-like definition.
  * For named object types, renders as `interface Name { ... }`.
  * For other types, renders as `type: ...`.
@@ -129,7 +151,8 @@ export function formatType(type: Type): string {
         const bNullish = b.kind === TypeKind.Null || b.kind === TypeKind.Undefined ? 1 : 0;
         return aNullish - bNullish;
       });
-      return sorted.map(formatType).join(" | ");
+      const parts = sorted.map(formatType);
+      return [...new Set(parts)].join(" | ");
     }
     case TypeKind.StringLiteral:
       return JSON.stringify(type.value);
