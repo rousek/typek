@@ -70,7 +70,6 @@ connection.onInitialize((_params: InitializeParams): InitializeResult => {
   registerEmbeddedLanguage("json", new JSONEmbeddedService());
   registerEmbeddedLanguage("css", new CSSEmbeddedService("css"));
   registerEmbeddedLanguage("scss", new CSSEmbeddedService("scss"));
-  registerEmbeddedLanguage("sass", new CSSEmbeddedService("sass"));
 
   return {
     capabilities: {

@@ -25,7 +25,6 @@ export function activate(context: vscode.ExtensionContext): void {
       { language: "typecek-json" },
       { language: "typecek-css" },
       { language: "typecek-scss" },
-      { language: "typecek-sass" },
     ],
     synchronize: {
       configurationSection: "typecek",

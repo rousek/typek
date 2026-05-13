@@ -96,7 +96,6 @@ const hostLanguageMap: Record<string, string> = {
   "typecek-json": "json",
   "typecek-css": "css",
   "typecek-scss": "scss",
-  "typecek-sass": "sass",
 };
 
 export function registerHostLanguage(

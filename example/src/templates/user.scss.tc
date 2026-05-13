@@ -1,0 +1,32 @@
+{{#import User from "../models/user"}}
+$primary: {{#if role == "admin"}}#c0392b{{#else}}#2980b9{{/if}};
+$radius: 8px;
+
+@mixin card-base {
+  padding: 16px;
+  border-radius: $radius;
+  font-family: system-ui, sans-serif;
+}
+
+.user-card {
+  @include card-base;
+  border: 1px solid $primary;
+
+  &__name {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: $primary;
+
+    &::before {
+      content: "{{name}} — ";
+    }
+  }
+
+  &__email {
+    color: lighten($primary, 20%);
+
+    &[data-value="{{email}}"] {
+      text-decoration: underline;
+    }
+  }
+}

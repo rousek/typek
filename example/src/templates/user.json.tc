@@ -1,0 +1,12 @@
+{{#import User from "../models/user"}}
+{
+  "name": "{{name}}",
+  "email": "{{email}}",
+  "role": "{{role}}"{{#if address}},
+  "address": {
+    "street": "{{address.street}}",
+    "city": "{{address.city}}",
+    "zip": "{{address.zip}}",
+    "country": "{{address.country}}"
+  }{{/if}}
+}

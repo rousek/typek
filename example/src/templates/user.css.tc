@@ -1,0 +1,23 @@
+{{#import User from "../models/user"}}
+:root {
+  --user-color: {{#if role == "admin"}}#c0392b{{#else}}#2980b9{{/if}};
+}
+
+.user-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--user-color);
+  border-radius: 8px;
+  font-family: system-ui, sans-serif;
+}
+
+.user-card::before {
+  content: "{{name}}";
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.user-card[data-email="{{email}}"] {
+  background: #f9f9f9;
+}
