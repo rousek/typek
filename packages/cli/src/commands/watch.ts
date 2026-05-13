@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { compile } from "@typecek/compiler";
 import { findTsconfigRoot, findSourceRoot } from "./compile.js";
+import { formatWithPrettier } from "../format.js";
 
 export function watch(): void {
   const projectRoot = findTsconfigRoot();
@@ -35,7 +36,7 @@ export function watch(): void {
 
       const outputDir = path.dirname(outputPath);
       fs.mkdirSync(outputDir, { recursive: true });
-      fs.writeFileSync(outputPath, result.code);
+      fs.writeFileSync(outputPath, formatWithPrettier(result.code, outputPath));
 
       console.log(`  compiled ${relativePath}`);
     } catch (err) {

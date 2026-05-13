@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { compile } from "@typecek/compiler";
 import type { Diagnostic } from "@typecek/core";
+import { formatWithPrettier } from "../format.js";
 
 // ANSI color helpers
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
@@ -149,7 +150,7 @@ export function compileAll(checkOnly = false): void {
       if (!checkOnly) {
         const outputDir = path.dirname(outputPath);
         fs.mkdirSync(outputDir, { recursive: true });
-        fs.writeFileSync(outputPath, result.code);
+        fs.writeFileSync(outputPath, formatWithPrettier(result.code, outputPath));
       }
 
       const diagCount = result.diagnostics.filter((d) => d.severity === "error").length;
