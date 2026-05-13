@@ -1,0 +1,15 @@
+{
+  "scopeName": "source.css.scss.typecek",
+  "name": "Typecek SCSS",
+  "patterns": [
+    { "include": "text.typecek#type-directive" },
+    { "include": "text.typecek#comment" },
+    { "include": "text.typecek#raw-expression" },
+    { "include": "text.typecek#block-close" },
+    { "include": "text.typecek#block-open" },
+    { "include": "text.typecek#partial" },
+    { "include": "text.typecek#escaped-braces" },
+    { "include": "text.typecek#expression" },
+    { "include": "source.css.scss" }
+  ]
+}

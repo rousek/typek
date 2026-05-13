@@ -1,5 +1,9 @@
-import type { CompletionItem, Hover, Location } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
+import type {
+  CompletionItem,
+  Hover,
+  Location,
+} from "vscode-languageserver/node";
 
 /**
  * Interface for embedded language services.
@@ -10,9 +14,18 @@ import type { TextDocument } from "vscode-languageserver-textdocument";
  * (via `getVirtualContent`) and delegating to the underlying language service.
  */
 export interface EmbeddedLanguageService {
-  doHover(document: TextDocument, position: { line: number; character: number }): Hover | null;
-  doComplete(document: TextDocument, position: { line: number; character: number }): CompletionItem[] | null;
-  doDefinition(document: TextDocument, position: { line: number; character: number }): Location | null;
+  doHover(
+    document: TextDocument,
+    position: { line: number; character: number },
+  ): Hover | null | Promise<Hover | null>;
+  doComplete(
+    document: TextDocument,
+    position: { line: number; character: number },
+  ): CompletionItem[] | null | Promise<CompletionItem[] | null>;
+  doDefinition(
+    document: TextDocument,
+    position: { line: number; character: number },
+  ): Location | null | Promise<Location | null>;
   onDocumentClose?(uri: string): void;
 }
 
@@ -26,13 +39,18 @@ const registry = new Map<string, EmbeddedLanguageService>();
  * registerEmbeddedLanguage("xml", new XMLEmbeddedService());
  * ```
  */
-export function registerEmbeddedLanguage(hostLanguage: string, service: EmbeddedLanguageService): void {
+export function registerEmbeddedLanguage(
+  hostLanguage: string,
+  service: EmbeddedLanguageService,
+): void {
   registry.set(hostLanguage, service);
 }
 
 /**
  * Get the embedded language service for a host language, if registered.
  */
-export function getEmbeddedLanguage(hostLanguage: string): EmbeddedLanguageService | undefined {
+export function getEmbeddedLanguage(
+  hostLanguage: string,
+): EmbeddedLanguageService | undefined {
   return registry.get(hostLanguage);
 }

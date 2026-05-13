@@ -46,6 +46,66 @@
         "configuration": "./language-configuration.json"
       },
       {
+        "id": "typecek-json",
+        "aliases": [
+          "Typecek JSON",
+          "tc-json"
+        ],
+        "extensions": [
+          ".json.tc"
+        ],
+        "icon": {
+          "light": "./icons/tc-file.svg",
+          "dark": "./icons/tc-file.svg"
+        },
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "typecek-css",
+        "aliases": [
+          "Typecek CSS",
+          "tc-css"
+        ],
+        "extensions": [
+          ".css.tc"
+        ],
+        "icon": {
+          "light": "./icons/tc-file.svg",
+          "dark": "./icons/tc-file.svg"
+        },
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "typecek-scss",
+        "aliases": [
+          "Typecek SCSS",
+          "tc-scss"
+        ],
+        "extensions": [
+          ".scss.tc"
+        ],
+        "icon": {
+          "light": "./icons/tc-file.svg",
+          "dark": "./icons/tc-file.svg"
+        },
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "typecek-sass",
+        "aliases": [
+          "Typecek Sass",
+          "tc-sass"
+        ],
+        "extensions": [
+          ".sass.tc"
+        ],
+        "icon": {
+          "light": "./icons/tc-file.svg",
+          "dark": "./icons/tc-file.svg"
+        },
+        "configuration": "./language-configuration.json"
+      },
+      {
         "id": "typecek",
         "aliases": [
           "Typecek"
@@ -115,6 +175,38 @@
         }
       },
       {
+        "language": "typecek-json",
+        "scopeName": "source.json.typecek",
+        "path": "./syntaxes/typecek-json.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.json": "json"
+        }
+      },
+      {
+        "language": "typecek-css",
+        "scopeName": "source.css.typecek",
+        "path": "./syntaxes/typecek-css.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.css": "css"
+        }
+      },
+      {
+        "language": "typecek-scss",
+        "scopeName": "source.css.scss.typecek",
+        "path": "./syntaxes/typecek-scss.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.css.scss": "scss"
+        }
+      },
+      {
+        "language": "typecek-sass",
+        "scopeName": "source.sass.typecek",
+        "path": "./syntaxes/typecek-sass.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.sass": "sass"
+        }
+      },
+      {
         "language": "typecek",
         "scopeName": "text.typecek",
         "path": "./syntaxes/typecek.tmLanguage.json"
@@ -140,6 +232,7 @@
     "typescript": "^5.7.0",
     "vscode-css-languageservice": "^6.3.10",
     "vscode-html-languageservice": "^5.6.2",
+    "vscode-json-languageservice": "^5.7.2",
     "vscode-languageclient": "^9.0.1",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.12",

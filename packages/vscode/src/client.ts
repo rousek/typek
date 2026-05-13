@@ -22,13 +22,22 @@ export function activate(context: vscode.ExtensionContext): void {
       { language: "typecek-html" },
       { language: "typecek-ts" },
       { language: "typecek" },
+      { language: "typecek-json" },
+      { language: "typecek-css" },
+      { language: "typecek-scss" },
+      { language: "typecek-sass" },
     ],
     synchronize: {
       configurationSection: "typecek",
     },
   };
 
-  client = new LanguageClient("typecek", "Typecek", serverOptions, clientOptions);
+  client = new LanguageClient(
+    "typecek",
+    "Typecek",
+    serverOptions,
+    clientOptions,
+  );
   client.start();
 }
 

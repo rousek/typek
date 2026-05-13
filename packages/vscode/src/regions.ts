@@ -9,7 +9,10 @@ export interface DocumentRegion {
  * - Typecek regions inside {{ }} and {{{ }}}
  * - Host language regions (html, typescript, etc.) outside
  */
-export function scanRegions(text: string, hostLanguage: string): DocumentRegion[] {
+export function scanRegions(
+  text: string,
+  hostLanguage: string,
+): DocumentRegion[] {
   const regions: DocumentRegion[] = [];
   // Match {{ ... }}, {{{ ... }}}, and {{! ... }}
   const pattern = /\{\{\{.*?\}\}\}|\{\{.*?\}\}/gs;
@@ -19,16 +22,28 @@ export function scanRegions(text: string, hostLanguage: string): DocumentRegion[
   while ((match = pattern.exec(text)) !== null) {
     // Host region before this expression
     if (match.index > lastEnd) {
-      regions.push({ start: lastEnd, end: match.index, languageId: hostLanguage });
+      regions.push({
+        start: lastEnd,
+        end: match.index,
+        languageId: hostLanguage,
+      });
     }
     // Typecek region
-    regions.push({ start: match.index, end: match.index + match[0].length, languageId: "typecek" });
+    regions.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      languageId: "typecek",
+    });
     lastEnd = match.index + match[0].length;
   }
 
   // Trailing host content
   if (lastEnd < text.length) {
-    regions.push({ start: lastEnd, end: text.length, languageId: hostLanguage });
+    regions.push({
+      start: lastEnd,
+      end: text.length,
+      languageId: hostLanguage,
+    });
   }
 
   return regions;
@@ -38,7 +53,11 @@ export function scanRegions(text: string, hostLanguage: string): DocumentRegion[
  * Generate a virtual document for a specific language by replacing
  * other language regions with whitespace (preserving line/column mapping).
  */
-export function getVirtualContent(text: string, regions: DocumentRegion[], languageId: string): string {
+export function getVirtualContent(
+  text: string,
+  regions: DocumentRegion[],
+  languageId: string,
+): string {
   const chars = text.split("");
   for (const region of regions) {
     if (region.languageId !== languageId) {
@@ -55,7 +74,10 @@ export function getVirtualContent(text: string, regions: DocumentRegion[], langu
 /**
  * Find which region contains the given offset.
  */
-export function getRegionAtOffset(regions: DocumentRegion[], offset: number): DocumentRegion | undefined {
+export function getRegionAtOffset(
+  regions: DocumentRegion[],
+  offset: number,
+): DocumentRegion | undefined {
   for (const region of regions) {
     if (offset >= region.start && offset < region.end) {
       return region;
@@ -71,9 +93,16 @@ export function getRegionAtOffset(regions: DocumentRegion[], offset: number): Do
 const hostLanguageMap: Record<string, string> = {
   "typecek-html": "html",
   "typecek-ts": "typescript",
+  "typecek-json": "json",
+  "typecek-css": "css",
+  "typecek-scss": "scss",
+  "typecek-sass": "sass",
 };
 
-export function registerHostLanguage(documentLanguageId: string, hostLanguage: string): void {
+export function registerHostLanguage(
+  documentLanguageId: string,
+  hostLanguage: string,
+): void {
   hostLanguageMap[documentLanguageId] = hostLanguage;
 }
 
